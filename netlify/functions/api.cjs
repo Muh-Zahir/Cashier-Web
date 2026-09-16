@@ -150,7 +150,29 @@ exports.handler = async function(event, context) {
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ success: true, message: 'KasirPro API on Turso is running', timestamp: new Date().toISOString() })
+        body: JSON.stringify({ success: true, message: 'KasirPro API on Turso is running v2', timestamp: new Date().toISOString() })
+      };
+    }
+
+    // ========== DEBUG (TEMPORARY) ==========
+    if (path === '/debug' && method === 'GET') {
+      const dbUrl = process.env.TURSO_DATABASE_URL || 'NOT_SET';
+      const hasToken = process.env.TURSO_AUTH_TOKEN ? 'SET' : 'NOT_SET';
+      const urlUsed = TURSO_URL;
+      // Test connection
+      let dbTest = 'untested';
+      try {
+        const testRes = await fetch(TURSO_URL, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${TURSO_TOKEN}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requests: [{ type: 'execute', stmt: { sql: 'SELECT COUNT(*) as cnt FROM users', args: [] } }] })
+        });
+        const testData = await testRes.json();
+        dbTest = { status: testRes.status, hasResults: !!testData.results, raw: JSON.stringify(testData).slice(0, 200) };
+      } catch(e) { dbTest = `error: ${e.message}`; }
+      return {
+        statusCode: 200, headers,
+        body: JSON.stringify({ dbUrl, hasToken, urlUsed, dbTest })
       };
     }
 
