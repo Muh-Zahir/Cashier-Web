@@ -44,6 +44,11 @@ async function query(sql, args = []) {
     })
   });
   const data = await res.json();
+  // Handle Turso error responses (e.g., 401 Unauthorized, wrong URL)
+  if (!res.ok || !data.results) {
+    const errMsg = data.error || data.message || `Turso HTTP ${res.status}: Periksa TURSO_DATABASE_URL dan TURSO_AUTH_TOKEN di Netlify`;
+    throw new Error(errMsg);
+  }
   const r = data.results[0];
   if (r.type === 'error') throw new Error(r.error.message);
   const result = r.response.result;
@@ -68,13 +73,18 @@ async function batch(statements) {
     body: JSON.stringify({ requests })
   });
   const data = await res.json();
+  // Handle Turso error responses
+  if (!res.ok || !data.results) {
+    const errMsg = data.error || data.message || `Turso HTTP ${res.status}: Periksa TURSO_DATABASE_URL dan TURSO_AUTH_TOKEN di Netlify`;
+    throw new Error(errMsg);
+  }
   return data.results.map(r => {
     if (r.type === 'error') throw new Error(r.error.message);
-    const res = r.response.result;
+    const result = r.response.result;
     return {
-      rows: parseRows(res.cols, res.rows),
-      rowsAffected: res.affected_row_count,
-      lastInsertRowid: res.last_insert_rowid ? Number(res.last_insert_rowid) : null
+      rows: parseRows(result.cols, result.rows),
+      rowsAffected: result.affected_row_count,
+      lastInsertRowid: result.last_insert_rowid ? Number(result.last_insert_rowid) : null
     };
   });
 }
@@ -140,7 +150,29 @@ exports.handler = async function(event, context) {
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ success: true, message: 'KasirPro API on Turso is running', timestamp: new Date().toISOString() })
+        body: JSON.stringify({ success: true, message: 'KasirPro API on Turso is running v2', timestamp: new Date().toISOString() })
+      };
+    }
+
+    // ========== DEBUG (TEMPORARY) ==========
+    if (path === '/debug' && method === 'GET') {
+      const dbUrl = process.env.TURSO_DATABASE_URL || 'NOT_SET';
+      const hasToken = process.env.TURSO_AUTH_TOKEN ? 'SET' : 'NOT_SET';
+      const urlUsed = TURSO_URL;
+      // Test connection
+      let dbTest = 'untested';
+      try {
+        const testRes = await fetch(TURSO_URL, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${TURSO_TOKEN}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requests: [{ type: 'execute', stmt: { sql: 'SELECT COUNT(*) as cnt FROM users', args: [] } }] })
+        });
+        const testData = await testRes.json();
+        dbTest = { status: testRes.status, hasResults: !!testData.results, raw: JSON.stringify(testData).slice(0, 200) };
+      } catch(e) { dbTest = `error: ${e.message}`; }
+      return {
+        statusCode: 200, headers,
+        body: JSON.stringify({ dbUrl, hasToken, urlUsed, dbTest })
       };
     }
 
