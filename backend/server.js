@@ -33,14 +33,13 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Root route
+// Health checks for container platforms (Back4App, Render, etc.)
 app.get('/', (req, res) => {
-  res.json({
-    name: 'KasirPro API',
-    status: 'online',
-    version: '1.0.0',
-    documentation: '/api/health',
-  });
+  res.status(200).send('KasirPro API is running');
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy' });
 });
 
 // Routes
@@ -65,7 +64,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, error: err.message });
 });
 
-app.listen(PORT, () => {
-  console.log(`\n🚀 Server berjalan di http://localhost:${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/api/health\n`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`\n🚀 Server berjalan di http://0.0.0.0:${PORT}`);
+  console.log(`📊 Health check: http://0.0.0.0:${PORT}/api/health\n`);
 });
