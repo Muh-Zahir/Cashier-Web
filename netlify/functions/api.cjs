@@ -44,6 +44,11 @@ async function query(sql, args = []) {
     })
   });
   const data = await res.json();
+  // Handle Turso error responses (e.g., 401 Unauthorized, wrong URL)
+  if (!res.ok || !data.results) {
+    const errMsg = data.error || data.message || `Turso HTTP ${res.status}: Periksa TURSO_DATABASE_URL dan TURSO_AUTH_TOKEN di Netlify`;
+    throw new Error(errMsg);
+  }
   const r = data.results[0];
   if (r.type === 'error') throw new Error(r.error.message);
   const result = r.response.result;
@@ -68,13 +73,18 @@ async function batch(statements) {
     body: JSON.stringify({ requests })
   });
   const data = await res.json();
+  // Handle Turso error responses
+  if (!res.ok || !data.results) {
+    const errMsg = data.error || data.message || `Turso HTTP ${res.status}: Periksa TURSO_DATABASE_URL dan TURSO_AUTH_TOKEN di Netlify`;
+    throw new Error(errMsg);
+  }
   return data.results.map(r => {
     if (r.type === 'error') throw new Error(r.error.message);
-    const res = r.response.result;
+    const result = r.response.result;
     return {
-      rows: parseRows(res.cols, res.rows),
-      rowsAffected: res.affected_row_count,
-      lastInsertRowid: res.last_insert_rowid ? Number(res.last_insert_rowid) : null
+      rows: parseRows(result.cols, result.rows),
+      rowsAffected: result.affected_row_count,
+      lastInsertRowid: result.last_insert_rowid ? Number(result.last_insert_rowid) : null
     };
   });
 }
