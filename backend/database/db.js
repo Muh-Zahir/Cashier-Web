@@ -8,11 +8,24 @@ if (!fs.existsSync(dbDir)) {
 }
 
 const dbPath = path.join(dbDir, 'kasir.db');
-const db = new Database(dbPath);
+const shmPath = path.join(dbDir, 'kasir.db-shm');
+const walPath = path.join(dbDir, 'kasir.db-wal');
 
-// Enable WAL mode for better performance
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+let db;
+try {
+  db = new Database(dbPath);
+  db.pragma('journal_mode = WAL');
+  db.pragma('foreign_keys = ON');
+  console.log('✅ SQLite connected in WAL mode');
+} catch (err) {
+  console.warn('⚠️ WAL mode failed, attempting recovery:', err.message);
+  try { if (fs.existsSync(shmPath)) fs.unlinkSync(shmPath); } catch (_) {}
+  try { if (fs.existsSync(walPath)) fs.unlinkSync(walPath); } catch (_) {}
+  db = new Database(dbPath);
+  db.pragma('journal_mode = DELETE');
+  db.pragma('foreign_keys = ON');
+  console.log('✅ SQLite connected in DELETE mode');
+}
 
 // ========== SCHEMA MIGRATION (CREATE IF NOT EXISTS) ==========
 db.exec(`

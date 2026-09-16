@@ -1,6 +1,16 @@
+process.on('uncaughtException', (err) => {
+  console.error('FATAL UNCAUGHT EXCEPTION:', err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('FATAL UNHANDLED REJECTION:', reason);
+});
+
+console.log('🚀 Initializing KasirPro backend server...');
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
+try {
+  require('dotenv').config({ quiet: true });
+} catch (_) {}
 
 const app = express();
 const PORT = process.env.PORT || 5000;

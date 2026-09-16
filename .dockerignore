@@ -3,3 +3,7 @@ node_modules
 */node_modules
 .git
 .github
+*.db-wal
+*.db-shm
+backend/data/*.db-wal
+backend/data/*.db-shm
