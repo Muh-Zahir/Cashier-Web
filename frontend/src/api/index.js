@@ -1,11 +1,16 @@
 import axios from 'axios';
 
-const defaultBaseUrl = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-  ? 'http://localhost:5000/api'
+// Always use same-origin '/api' in production (e.g. Netlify) so it routes to Netlify Functions.
+// Only use localhost or custom VITE_API_BASE_URL when developing locally on localhost/127.0.0.1.
+const isLocalhost = typeof window !== 'undefined' && 
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+const apiBaseUrl = isLocalhost
+  ? (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api')
   : '/api';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || defaultBaseUrl,
+  baseURL: apiBaseUrl,
   timeout: 30000,
   headers: { 'Content-Type': 'application/json' },
 });
