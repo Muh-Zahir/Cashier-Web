@@ -6,7 +6,7 @@ const defaultBaseUrl = typeof window !== 'undefined' && (window.location.hostnam
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || defaultBaseUrl,
-  timeout: 15000,
+  timeout: 30000,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -32,7 +32,16 @@ api.interceptors.response.use(
       localStorage.removeItem('kasirpro_user');
       window.location.href = '/login';
     }
-    const message = error.response?.data?.error || error.message || 'Terjadi kesalahan';
+    const isTimeout = error.code === 'ECONNABORTED' || error.message?.toLowerCase().includes('timeout');
+    const isNetworkErr = error.message === 'Network Error';
+    let message = error.response?.data?.error;
+    if (!message) {
+      if (isTimeout || isNetworkErr) {
+        message = 'Koneksi lambat (database sedang bangun), silakan coba klik lagi.';
+      } else {
+        message = error.message || 'Terjadi kesalahan jaringan';
+      }
+    }
     return Promise.reject(new Error(message));
   }
 );
