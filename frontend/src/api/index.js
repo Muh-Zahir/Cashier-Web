@@ -39,7 +39,20 @@ api.interceptors.response.use(
     }
     const isTimeout = error.code === 'ECONNABORTED' || error.message?.toLowerCase().includes('timeout');
     const isNetworkErr = error.message === 'Network Error';
-    let message = error.response?.data?.error;
+
+    let errData = error.response?.data;
+    let message = '';
+
+    if (errData) {
+      if (typeof errData.error === 'string') {
+        message = errData.error;
+      } else if (typeof errData.error === 'object' && errData.error !== null) {
+        message = errData.error.message || errData.error.code || JSON.stringify(errData.error);
+      } else if (typeof errData.message === 'string') {
+        message = errData.message;
+      }
+    }
+
     if (!message) {
       if (isTimeout || isNetworkErr) {
         message = 'Koneksi lambat (database sedang bangun), silakan coba klik lagi.';
