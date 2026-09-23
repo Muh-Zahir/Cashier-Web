@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { productsApi, transactionsApi } from '../api';
 import useCartStore from '../store/useCartStore';
 import { useAuthStore } from '../store/useAuthStore';
@@ -204,24 +205,26 @@ const EKSPEDISI_LIST = [
   { name: 'Lainnya',      emoji: '🚀' },
 ];
 
-// ====== EXPEDITION DROPDOWN (position:fixed portal — escapes overflow:hidden) ======
+// ====== EXPEDITION DROPDOWN (ReactDOM portal — renders into document.body) ======
 function ExpedisiDropdown({ triggerRef, onClose, selected, onSelect }) {
   const [pos, setPos] = React.useState({ top: 0, left: 0, width: 0 });
   const listRef = useRef(null);
 
   useEffect(() => {
-    if (triggerRef.current) {
-      const r = triggerRef.current.getBoundingClientRect();
-      setPos({ top: r.bottom + window.scrollY + 4, left: r.left + window.scrollX, width: r.width });
-    }
-    function onScroll() {
+    function calcPos() {
       if (triggerRef.current) {
         const r = triggerRef.current.getBoundingClientRect();
-        setPos({ top: r.bottom + window.scrollY + 4, left: r.left + window.scrollX, width: r.width });
+        // position:fixed → coordinates are already relative to viewport, no need for scrollY
+        setPos({ top: r.bottom + 4, left: r.left, width: r.width });
       }
     }
-    window.addEventListener('scroll', onScroll, true);
-    return () => window.removeEventListener('scroll', onScroll, true);
+    calcPos();
+    window.addEventListener('scroll', calcPos, true);
+    window.addEventListener('resize', calcPos);
+    return () => {
+      window.removeEventListener('scroll', calcPos, true);
+      window.removeEventListener('resize', calcPos);
+    };
   }, [triggerRef]);
 
   useEffect(() => {
@@ -235,7 +238,7 @@ function ExpedisiDropdown({ triggerRef, onClose, selected, onSelect }) {
     return () => document.removeEventListener('mousedown', onMouseDown);
   }, [onClose, triggerRef]);
 
-  return (
+  const dropdown = (
     <div
       ref={listRef}
       style={{
@@ -243,12 +246,12 @@ function ExpedisiDropdown({ triggerRef, onClose, selected, onSelect }) {
         top: pos.top,
         left: pos.left,
         width: Math.max(pos.width, 150),
-        zIndex: 99999,
+        zIndex: 2147483647,   /* max possible z-index */
         background: 'var(--surface)',
         border: '1px solid var(--border)',
         borderRadius: 9,
         overflow: 'hidden',
-        boxShadow: '0 10px 32px rgba(0,0,0,0.5)',
+        boxShadow: '0 10px 32px rgba(0,0,0,0.55)',
         animation: 'fadeInDown 0.15s ease',
       }}
     >
@@ -278,6 +281,8 @@ function ExpedisiDropdown({ triggerRef, onClose, selected, onSelect }) {
       })}
     </div>
   );
+
+  return ReactDOM.createPortal(dropdown, document.body);
 }
 
 // ====== SHIPPING SECTION ======
