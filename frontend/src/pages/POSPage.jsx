@@ -392,6 +392,7 @@ function ShippingSection() {
       )}
     </div>
   );
+}
 
 // ====== CART PANEL ======
 function CartPanel({ onCheckout }) {
