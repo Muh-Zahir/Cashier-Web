@@ -204,35 +204,99 @@ const EKSPEDISI_LIST = [
   { name: 'Lainnya',      emoji: '🚀' },
 ];
 
+// ====== EXPEDITION DROPDOWN (position:fixed portal — escapes overflow:hidden) ======
+function ExpedisiDropdown({ triggerRef, onClose, selected, onSelect }) {
+  const [pos, setPos] = React.useState({ top: 0, left: 0, width: 0 });
+  const listRef = useRef(null);
+
+  useEffect(() => {
+    if (triggerRef.current) {
+      const r = triggerRef.current.getBoundingClientRect();
+      setPos({ top: r.bottom + window.scrollY + 4, left: r.left + window.scrollX, width: r.width });
+    }
+    function onScroll() {
+      if (triggerRef.current) {
+        const r = triggerRef.current.getBoundingClientRect();
+        setPos({ top: r.bottom + window.scrollY + 4, left: r.left + window.scrollX, width: r.width });
+      }
+    }
+    window.addEventListener('scroll', onScroll, true);
+    return () => window.removeEventListener('scroll', onScroll, true);
+  }, [triggerRef]);
+
+  useEffect(() => {
+    function onMouseDown(e) {
+      if (listRef.current && !listRef.current.contains(e.target) &&
+          triggerRef.current && !triggerRef.current.contains(e.target)) {
+        onClose();
+      }
+    }
+    document.addEventListener('mousedown', onMouseDown);
+    return () => document.removeEventListener('mousedown', onMouseDown);
+  }, [onClose, triggerRef]);
+
+  return (
+    <div
+      ref={listRef}
+      style={{
+        position: 'fixed',
+        top: pos.top,
+        left: pos.left,
+        width: Math.max(pos.width, 150),
+        zIndex: 99999,
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
+        borderRadius: 9,
+        overflow: 'hidden',
+        boxShadow: '0 10px 32px rgba(0,0,0,0.5)',
+        animation: 'fadeInDown 0.15s ease',
+      }}
+    >
+      {EKSPEDISI_LIST.map((exp) => {
+        const isSel = selected === exp.name;
+        return (
+          <button
+            key={exp.name}
+            type="button"
+            onClick={() => onSelect(exp.name)}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+              padding: '8px 11px', fontSize: 12, fontWeight: isSel ? 700 : 400,
+              background: isSel ? 'var(--accent-dim)' : 'transparent',
+              color: isSel ? 'var(--white)' : 'var(--text-primary)',
+              border: 'none', cursor: 'pointer', textAlign: 'left',
+              transition: 'background 0.12s',
+            }}
+            onMouseEnter={e => { if (!isSel) e.currentTarget.style.background = 'var(--hover)'; }}
+            onMouseLeave={e => { if (!isSel) e.currentTarget.style.background = 'transparent'; }}
+          >
+            <span style={{ fontSize: 14 }}>{exp.emoji}</span>
+            <span>{exp.name}</span>
+            {isSel && <Check size={12} style={{ marginLeft: 'auto', color: 'var(--accent)' }} />}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 // ====== SHIPPING SECTION ======
 function ShippingSection() {
   const { shippingEnabled, shippingCost, shippingName, recipientName, recipientAddress, toggleShipping, setShipping } = useCartStore();
-  const [open, setOpen] = useState(shippingEnabled);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setDropdownOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  const triggerRef = useRef(null);
 
   function handleToggle() {
     const next = !shippingEnabled;
     toggleShipping(next);
-    setOpen(next);
+    setDropdownOpen(false);
     if (!next) setShipping({ shippingCost: 0, shippingName: '', recipientName: '', recipientAddress: '' });
   }
 
   const selectedExp = EKSPEDISI_LIST.find(e => e.name === shippingName);
 
   return (
-    <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'visible' }}>
+    <div style={{ border: '1px solid var(--border)', borderRadius: 10 }}>
       {/* Toggle Header */}
       <button
         onClick={handleToggle}
@@ -256,10 +320,11 @@ function ShippingSection() {
         <div style={{ padding: '10px 12px', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
 
-            {/* Custom Expedition Dropdown */}
-            <div className="form-group" ref={dropdownRef} style={{ position: 'relative' }}>
+            {/* Custom Dropdown — uses fixed portal to escape overflow:hidden */}
+            <div className="form-group">
               <label className="form-label">Ekspedisi</label>
               <button
+                ref={triggerRef}
                 type="button"
                 onClick={() => setDropdownOpen(p => !p)}
                 style={{
@@ -268,60 +333,32 @@ function ShippingSection() {
                   background: 'var(--surface)', border: '1px solid var(--border)',
                   borderRadius: 7, color: selectedExp ? 'var(--text-primary)' : 'var(--text-muted)',
                   cursor: 'pointer', transition: 'var(--transition)',
-                  outline: dropdownOpen ? '2px solid var(--accent)' : 'none',
+                  boxShadow: dropdownOpen ? '0 0 0 2px var(--accent)' : 'none',
                 }}
               >
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  {selectedExp ? (
-                    <>{selectedExp.emoji} {selectedExp.name}</>
-                  ) : (
-                    <span style={{ color: 'var(--text-muted)' }}>— Pilih —</span>
-                  )}
+                  {selectedExp
+                    ? <>{selectedExp.emoji} {selectedExp.name}</>
+                    : <span style={{ color: 'var(--text-muted)' }}>— Pilih —</span>}
                 </span>
-                <ChevronDown size={13} style={{ opacity: 0.6, transition: 'transform 0.2s', transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+                <ChevronDown
+                  size={13}
+                  style={{ opacity: 0.6, transition: 'transform 0.2s', flexShrink: 0,
+                    transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                />
               </button>
 
-              {/* Dropdown List */}
               {dropdownOpen && (
-                <div style={{
-                  position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 999,
-                  background: 'var(--surface)', border: '1px solid var(--border)',
-                  borderRadius: 9, overflow: 'hidden',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
-                  animation: 'fadeInDown 0.15s ease',
-                }}>
-                  {EKSPEDISI_LIST.map((exp) => {
-                    const isSelected = shippingName === exp.name;
-                    return (
-                      <button
-                        key={exp.name}
-                        type="button"
-                        onClick={() => {
-                          setShipping({ shippingName: exp.name });
-                          setDropdownOpen(false);
-                        }}
-                        style={{
-                          width: '100%', display: 'flex', alignItems: 'center', gap: 8,
-                          padding: '8px 11px', fontSize: 12, fontWeight: isSelected ? 700 : 400,
-                          background: isSelected ? 'var(--accent-dim)' : 'transparent',
-                          color: isSelected ? 'var(--white)' : 'var(--text-primary)',
-                          border: 'none', cursor: 'pointer', textAlign: 'left',
-                          transition: 'background 0.12s',
-                        }}
-                        onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'var(--hover)'; }}
-                        onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
-                      >
-                        <span style={{ fontSize: 14 }}>{exp.emoji}</span>
-                        <span>{exp.name}</span>
-                        {isSelected && <Check size={12} style={{ marginLeft: 'auto', color: 'var(--accent)' }} />}
-                      </button>
-                    );
-                  })}
-                </div>
+                <ExpedisiDropdown
+                  triggerRef={triggerRef}
+                  onClose={() => setDropdownOpen(false)}
+                  selected={shippingName}
+                  onSelect={(name) => { setShipping({ shippingName: name }); setDropdownOpen(false); }}
+                />
               )}
             </div>
 
-            {/* Ongkir — text input, no spinner arrows */}
+            {/* Ongkir — text input (no spinner arrows) */}
             <div className="form-group">
               <label className="form-label">Ongkir (Rp)</label>
               <input
@@ -355,7 +392,6 @@ function ShippingSection() {
       )}
     </div>
   );
-}
 
 // ====== CART PANEL ======
 function CartPanel({ onCheckout }) {
