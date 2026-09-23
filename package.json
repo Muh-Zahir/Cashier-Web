@@ -2,6 +2,6 @@
   "name": "cashier-web",
   "private": true,
   "scripts": {
-    "build": "vite build"
+    "build": "npm --prefix frontend run build"
   }
 }
