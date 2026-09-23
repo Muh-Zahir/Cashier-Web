@@ -246,13 +246,15 @@ function ExpedisiDropdown({ triggerRef, onClose, selected, onSelect }) {
         top: pos.top,
         left: pos.left,
         width: Math.max(pos.width, 150),
-        zIndex: 2147483647,   /* max possible z-index */
-        background: 'var(--surface)',
-        border: '1px solid var(--border)',
+        zIndex: 2147483647,
+        background: '#ffffff',
+        border: '1px solid #d1d5db',
         borderRadius: 9,
         overflow: 'hidden',
-        boxShadow: '0 10px 32px rgba(0,0,0,0.55)',
+        boxShadow: '0 10px 32px rgba(0,0,0,0.25)',
         animation: 'fadeInDown 0.15s ease',
+        maxHeight: 220,
+        overflowY: 'auto',
       }}
     >
       {EKSPEDISI_LIST.map((exp) => {
@@ -264,18 +266,18 @@ function ExpedisiDropdown({ triggerRef, onClose, selected, onSelect }) {
             onClick={() => onSelect(exp.name)}
             style={{
               width: '100%', display: 'flex', alignItems: 'center', gap: 8,
-              padding: '8px 11px', fontSize: 12, fontWeight: isSel ? 700 : 400,
-              background: isSel ? 'var(--accent-dim)' : 'transparent',
-              color: isSel ? 'var(--white)' : 'var(--text-primary)',
+              padding: '9px 12px', fontSize: 13, fontWeight: isSel ? 700 : 400,
+              background: isSel ? '#6366f1' : 'transparent',
+              color: isSel ? '#ffffff' : '#111827',
               border: 'none', cursor: 'pointer', textAlign: 'left',
               transition: 'background 0.12s',
             }}
-            onMouseEnter={e => { if (!isSel) e.currentTarget.style.background = 'var(--hover)'; }}
+            onMouseEnter={e => { if (!isSel) e.currentTarget.style.background = '#f3f4f6'; }}
             onMouseLeave={e => { if (!isSel) e.currentTarget.style.background = 'transparent'; }}
           >
-            <span style={{ fontSize: 14 }}>{exp.emoji}</span>
+            <span style={{ fontSize: 15 }}>{exp.emoji}</span>
             <span>{exp.name}</span>
-            {isSel && <Check size={12} style={{ marginLeft: 'auto', color: 'var(--accent)' }} />}
+            {isSel && <Check size={13} style={{ marginLeft: 'auto', color: '#6366f1' }} />}
           </button>
         );
       })}
