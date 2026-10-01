@@ -402,7 +402,7 @@ function ShippingSection() {
 }
 
 // ====== CART PANEL ======
-function CartPanel({ onCheckout }) {
+function CartPanel({ onCheckout, mobileOpen = false, onCloseMobile }) {
   const {
     items, removeItem, updateQuantity, clearCart,
     getSubtotal, getDiscountAmount, getShippingCost, getTotal, getProfit, getItemCount,
@@ -432,20 +432,35 @@ function CartPanel({ onCheckout }) {
   const profitMargin = subtotal - discountAmt > 0 ? ((profit / (subtotal - discountAmt)) * 100).toFixed(1) : 0;
 
   return (
-    <div className="cart-panel">
-      {/* Header */}
-      <div className="cart-header">
-        <div className="cart-title">
-          <ShoppingCart size={16} />
-          Keranjang
-          {count > 0 && <span className="cart-count">{count}</span>}
+    <>
+      {mobileOpen && (
+        <div className="cart-backdrop" onClick={onCloseMobile} />
+      )}
+      <div className={`cart-panel${mobileOpen ? ' mobile-open' : ''}`}>
+        {/* Header */}
+        <div className="cart-header">
+          <div className="cart-title">
+            <ShoppingCart size={16} />
+            Keranjang
+            {count > 0 && <span className="cart-count">{count}</span>}
+          </div>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            {items.length > 0 && (
+              <button className="btn btn-danger btn-sm btn-icon" onClick={clearCart} title="Kosongkan keranjang">
+                <Trash2 size={13} />
+              </button>
+            )}
+            <button
+              type="button"
+              className="mobile-cart-close-btn"
+              onClick={onCloseMobile}
+              title="Tutup Keranjang"
+              aria-label="Tutup Keranjang"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
-        {items.length > 0 && (
-          <button className="btn btn-danger btn-sm btn-icon" onClick={clearCart} title="Kosongkan keranjang">
-            <Trash2 size={13} />
-          </button>
-        )}
-      </div>
 
       {/* Customer Type Selector (Umum vs Reseller) */}
       <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)', background: 'var(--bg-secondary)' }}>
@@ -608,6 +623,7 @@ function CartPanel({ onCheckout }) {
         </div>
       )}
     </div>
+    </>
   );
 }
 
@@ -621,6 +637,7 @@ export default function POSPage() {
   const [loading, setLoading]     = useState(true);
   const [showPayment, setShowPayment] = useState(false);
   const [receipt, setReceipt]     = useState(null);
+  const [mobileCartOpen, setMobileCartOpen] = useState(false);
 
   const { addItem, items, getTotal, shippingEnabled, shippingName, shippingCost, recipientName, recipientAddress } = useCartStore();
   const searchRef = useRef(null);
@@ -786,8 +803,51 @@ export default function POSPage() {
         )}
       </div>
 
+      {/* Mobile Floating Cart Bar */}
+      <div
+        className={`pos-mobile-cart-bar${items.length > 0 ? ' has-items' : ''}`}
+        onClick={() => setMobileCartOpen(true)}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div className="pos-mobile-cart-badge">
+            <ShoppingCart size={18} />
+            {items.length > 0 && (
+              <span className="pos-mobile-cart-count">
+                {items.reduce((s, i) => s + i.quantity, 0)}
+              </span>
+            )}
+          </div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--white)' }}>
+              {formatRupiah(getTotal())}
+            </div>
+            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+              {items.length} jenis item di keranjang
+            </div>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="btn btn-primary btn-sm"
+          style={{ padding: '6px 14px', fontSize: 12, fontWeight: 700 }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setMobileCartOpen(true);
+          }}
+        >
+          Keranjang & Bayar →
+        </button>
+      </div>
+
       {/* Cart */}
-      <CartPanel onCheckout={() => items.length > 0 && setShowPayment(true)} />
+      <CartPanel
+        mobileOpen={mobileCartOpen}
+        onCloseMobile={() => setMobileCartOpen(false)}
+        onCheckout={() => {
+          setMobileCartOpen(false);
+          items.length > 0 && setShowPayment(true);
+        }}
+      />
 
       {/* Payment Modal */}
       <PaymentModal isOpen={showPayment} onClose={() => setShowPayment(false)} total={getTotal()} onConfirm={handleCheckout} />

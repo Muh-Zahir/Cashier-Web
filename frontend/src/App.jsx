@@ -1,7 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Sidebar from './components/Sidebar';
+import MobileHeader from './components/MobileHeader';
+import MobileBottomNav from './components/MobileBottomNav';
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleRoute from './components/RoleRoute';
 import LoginPage from './pages/LoginPage';
@@ -13,12 +15,18 @@ import { useAuthStore } from './store/useAuthStore';
 import './index.css';
 
 function DashboardLayout({ children }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <ProtectedRoute>
       <div className="app-layout">
-        <Sidebar />
+        <Sidebar mobileOpen={mobileMenuOpen} setMobileOpen={setMobileMenuOpen} />
         <div className="main-content">
-          {children}
+          <MobileHeader onOpenMenu={() => setMobileMenuOpen(true)} />
+          <div className="main-content-inner">
+            {children}
+          </div>
+          <MobileBottomNav onOpenMenu={() => setMobileMenuOpen(true)} />
         </div>
       </div>
     </ProtectedRoute>

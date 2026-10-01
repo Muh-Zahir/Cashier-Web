@@ -7,6 +7,7 @@ import {
   ClipboardList,
   LogOut,
   User as UserIcon,
+  X,
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import Modal from './ui/Modal';
@@ -50,7 +51,7 @@ function Clock() {
   );
 }
 
-export default function Sidebar() {
+export default function Sidebar({ mobileOpen = false, setMobileOpen }) {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -81,7 +82,10 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="sidebar">
+      {mobileOpen && (
+        <div className="sidebar-backdrop" onClick={() => setMobileOpen?.(false)} />
+      )}
+      <aside className={`sidebar${mobileOpen ? ' mobile-open' : ''}`}>
         <div className="sidebar-logo">
           <div className="logo-wrapper">
             <div className="logo-icon">🛒</div>
@@ -90,6 +94,14 @@ export default function Sidebar() {
               <span className="logo-subtitle">Point of Sale System</span>
             </div>
           </div>
+          <button
+            type="button"
+            className="sidebar-close-btn"
+            onClick={() => setMobileOpen?.(false)}
+            aria-label="Tutup Menu"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         <nav className="sidebar-nav">
@@ -102,6 +114,7 @@ export default function Sidebar() {
                   <NavLink
                     key={to}
                     to={to}
+                    onClick={() => setMobileOpen?.(false)}
                     className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
                   >
                     <Icon className="nav-icon" />

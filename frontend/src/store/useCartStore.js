@@ -151,4 +151,5 @@ const useCartStore = create((set, get) => ({
     get().items.reduce((sum, item) => sum + item.quantity, 0),
 }));
 
+export { useCartStore };
 export default useCartStore;
