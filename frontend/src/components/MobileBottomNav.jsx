@@ -1,10 +1,10 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { ShoppingCart, Package, ClipboardList, LayoutDashboard, Menu } from 'lucide-react';
+import { ShoppingCart, Package, ClipboardList, LayoutDashboard } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useCartStore } from '../store/useCartStore';
 
-export default function MobileBottomNav({ onOpenMenu }) {
+export default function MobileBottomNav() {
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'admin';
   const itemCount = useCartStore((s) => s.getItemCount());
@@ -16,7 +16,7 @@ export default function MobileBottomNav({ onOpenMenu }) {
           to="/dashboard"
           className={({ isActive }) => `bottom-nav-item${isActive ? ' active' : ''}`}
         >
-          <LayoutDashboard size={19} />
+          <LayoutDashboard size={20} />
           <span>Dashboard</span>
         </NavLink>
       )}
@@ -26,7 +26,7 @@ export default function MobileBottomNav({ onOpenMenu }) {
         className={({ isActive }) => `bottom-nav-item${isActive ? ' active' : ''}`}
       >
         <div style={{ position: 'relative', display: 'inline-flex' }}>
-          <ShoppingCart size={19} />
+          <ShoppingCart size={20} />
           {itemCount > 0 && (
             <span className="bottom-nav-badge">{itemCount}</span>
           )}
@@ -38,7 +38,7 @@ export default function MobileBottomNav({ onOpenMenu }) {
         to="/products"
         className={({ isActive }) => `bottom-nav-item${isActive ? ' active' : ''}`}
       >
-        <Package size={19} />
+        <Package size={20} />
         <span>Produk</span>
       </NavLink>
 
@@ -46,19 +46,9 @@ export default function MobileBottomNav({ onOpenMenu }) {
         to="/transactions"
         className={({ isActive }) => `bottom-nav-item${isActive ? ' active' : ''}`}
       >
-        <ClipboardList size={19} />
+        <ClipboardList size={20} />
         <span>Transaksi</span>
       </NavLink>
-
-      <button
-        type="button"
-        className="bottom-nav-item"
-        onClick={onOpenMenu}
-        style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-      >
-        <Menu size={19} />
-        <span>Menu</span>
-      </button>
     </nav>
   );
 }
