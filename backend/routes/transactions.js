@@ -112,6 +112,20 @@ router.post('/', (req, res) => {
       return res.status(400).json({ success: false, error: 'Amount paid is insufficient' });
     }
 
+    // Validasi ketersediaan stok
+    for (const item of items) {
+      const productId = item.id || item.product_id || null;
+      if (productId) {
+        const prod = db.prepare('SELECT id, name, stock FROM products WHERE id = ?').get(productId);
+        if (prod && prod.stock < item.quantity) {
+          return res.status(400).json({
+            success: false,
+            error: `Stok "${prod.name}" tidak mencukupi (sisa ${prod.stock}, diminta ${item.quantity})`
+          });
+        }
+      }
+    }
+
     const invoice_number = generateInvoiceNumber();
 
     // Begin DB transaction
@@ -141,9 +155,10 @@ router.post('/', (req, res) => {
         const itemSubtotal = item.price * item.quantity;
         const itemCost = (item.cost_price || 0) * item.quantity;
         const itemProfit = itemSubtotal - itemCost;
+        const productId = item.id || item.product_id || null;
         insertItem.run(
           transactionId,
-          item.product_id || null,
+          productId,
           item.name,
           item.price,
           item.cost_price || 0,
@@ -151,10 +166,15 @@ router.post('/', (req, res) => {
           itemSubtotal,
           itemProfit
         );
-        // Reduce stock
-        if (item.product_id) {
-          db.prepare('UPDATE products SET stock = MAX(0, stock - ?), updated_at = CURRENT_TIMESTAMP WHERE id = ?')
-            .run(item.quantity, item.product_id);
+        // Reduce stock & automatically deactivate if stock is 0
+        if (productId) {
+          db.prepare(`
+            UPDATE products 
+            SET stock = MAX(0, stock - ?), 
+                is_active = CASE WHEN (stock - ?) <= 0 THEN 0 ELSE is_active END, 
+                updated_at = CURRENT_TIMESTAMP 
+            WHERE id = ?
+          `).run(item.quantity, item.quantity, productId);
         }
       }
 

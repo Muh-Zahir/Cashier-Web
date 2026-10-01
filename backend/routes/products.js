@@ -75,7 +75,13 @@ router.put('/:id', (req, res) => {
     const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
     if (!existing) return res.status(404).json({ success: false, error: 'Product not found' });
 
-    const activeValue = is_active !== undefined ? (is_active ? 1 : 0) : existing.is_active;
+    const finalStock = stock !== undefined ? Number(stock) : existing.stock;
+    let activeValue = is_active !== undefined ? (is_active ? 1 : 0) : existing.is_active;
+    if (finalStock <= 0) {
+      activeValue = 0;
+    } else if (finalStock > 0 && is_active === undefined && existing.stock <= 0) {
+      activeValue = 1;
+    }
 
     db.prepare(`
       UPDATE products SET
@@ -87,7 +93,7 @@ router.put('/:id', (req, res) => {
       price ?? existing.price,
       cost_price ?? existing.cost_price ?? 0,
       reseller_price ?? existing.reseller_price ?? 0,
-      stock ?? existing.stock,
+      finalStock,
       category_id ?? existing.category_id,
       emoji ?? existing.emoji,
       barcode ?? existing.barcode,
@@ -134,11 +140,12 @@ router.patch('/:id/stock', (req, res) => {
 
     const newStock = product.stock + amount;
     if (newStock < 0) return res.status(400).json({ success: false, error: 'Insufficient stock' });
+    const newActive = newStock <= 0 ? 0 : 1;
 
-    db.prepare('UPDATE products SET stock = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
-      .run(newStock, req.params.id);
+    db.prepare('UPDATE products SET stock = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+      .run(newStock, newActive, req.params.id);
 
-    res.json({ success: true, data: { ...product, stock: newStock } });
+    res.json({ success: true, data: { ...product, stock: newStock, is_active: newActive } });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

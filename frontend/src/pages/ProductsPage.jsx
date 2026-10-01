@@ -307,9 +307,9 @@ function RestockModal({ isOpen, onClose, product, onSaved }) {
         emoji: product.emoji || '📦',
         barcode: product.barcode || '',
         description: product.description || '',
-        is_active: newStock > 0 ? 1 : 0,
+        is_active: 1,
       });
-      toast.success(`✅ Stok ${product.name} berhasil ditambah +${jumlah} (Total: ${newStock})`);
+      toast.success(`✅ Stok ${product.name} ditambah +${jumlah} (Total: ${newStock}) & otomatis aktif kembali!`);
       onSaved();
       onClose();
     } catch (err) {
@@ -428,18 +428,19 @@ export default function ProductsPage() {
   const filtered = products.filter((p) => {
     const matchCat = selectedCategory === 'all' || p.category_id === selectedCategory;
     const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || (p.barcode && p.barcode.includes(search));
+    const isProductActive = (p.is_active === 1 || p.is_active === true) && p.stock > 0;
     const matchStatus =
       statusFilter === 'all'
         ? true
         : statusFilter === 'active'
-        ? p.is_active === 1 || p.is_active === true
-        : p.is_active === 0 || p.is_active === false;
+        ? isProductActive
+        : !isProductActive;
     return matchCat && matchSearch && matchStatus;
   });
 
-  const activeCount = products.filter((p) => p.is_active).length;
-  const inactiveCount = products.filter((p) => !p.is_active).length;
-  const lowStockCount = products.filter((p) => p.is_active && p.stock <= 10).length;
+  const activeCount = products.filter((p) => (p.is_active === 1 || p.is_active === true) && p.stock > 0).length;
+  const inactiveCount = products.filter((p) => !(p.is_active === 1 || p.is_active === true) || p.stock <= 0).length;
+  const lowStockCount = products.filter((p) => (p.is_active === 1 || p.is_active === true) && p.stock > 0 && p.stock <= 10).length;
 
   return (
     <div className="page-wrapper">
@@ -522,7 +523,7 @@ export default function ProductsPage() {
                   const isOut = p.stock <= 0;
                   const unitProfit = (p.price || 0) - (p.cost_price || 0);
                   const margin = p.price > 0 ? Math.round((unitProfit / p.price) * 100) : 0;
-                  const isActive = p.is_active === 1 || p.is_active === true;
+                  const isActive = (p.is_active === 1 || p.is_active === true) && p.stock > 0;
                   const hasResellerPrice = p.reseller_price > 0;
 
                   return (
