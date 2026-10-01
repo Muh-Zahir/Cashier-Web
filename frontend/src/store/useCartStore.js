@@ -34,14 +34,23 @@ const useCartStore = create((set, get) => ({
     const regularPrice = product.price;
     const resellerPrice = product.reseller_price || 0;
     const activePrice = customerType === 'reseller' && resellerPrice > 0 ? resellerPrice : regularPrice;
+    const availableStock = typeof product.stock === 'number' ? product.stock : Infinity;
+
+    if (availableStock <= 0) {
+      return { success: false, reason: 'out_of_stock', availableStock: 0 };
+    }
 
     const existing = items.find((i) => i.id === product.id);
     if (existing) {
+      if (existing.quantity >= availableStock) {
+        return { success: false, reason: 'max_stock_reached', availableStock };
+      }
       set({
         items: items.map((i) =>
-          i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.id === product.id ? { ...i, quantity: i.quantity + 1, stock: availableStock } : i
         ),
       });
+      return { success: true, quantity: existing.quantity + 1, availableStock };
     } else {
       set({
         items: [
@@ -52,17 +61,40 @@ const useCartStore = create((set, get) => ({
             regular_price: regularPrice,
             reseller_price: resellerPrice,
             quantity: 1,
+            stock: availableStock,
           },
         ],
       });
+      return { success: true, quantity: 1, availableStock };
     }
   },
 
   removeItem: (productId) => set({ items: get().items.filter((i) => i.id !== productId) }),
 
   updateQuantity: (productId, quantity) => {
-    if (quantity <= 0) { get().removeItem(productId); return; }
-    set({ items: get().items.map((i) => i.id === productId ? { ...i, quantity } : i) });
+    if (quantity <= 0) {
+      get().removeItem(productId);
+      return { success: true, removed: true };
+    }
+    const item = get().items.find((i) => i.id === productId);
+    if (!item) return { success: false };
+
+    const availableStock = typeof item.stock === 'number' ? item.stock : Infinity;
+    if (quantity > availableStock) {
+      set({
+        items: get().items.map((i) =>
+          i.id === productId ? { ...i, quantity: availableStock } : i
+        ),
+      });
+      return { success: false, reason: 'max_stock_reached', availableStock };
+    }
+
+    set({
+      items: get().items.map((i) =>
+        i.id === productId ? { ...i, quantity } : i
+      ),
+    });
+    return { success: true, quantity, availableStock };
   },
 
   clearCart: () => set({

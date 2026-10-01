@@ -302,7 +302,8 @@ export default async function handler(req, res) {
         const prod = await query('SELECT * FROM products WHERE id = ?', [id]);
         if (!prod.rows.length) return res.status(404).json({ success: false, error: 'Product not found' });
         const newStock = Math.max(0, prod.rows[0].stock + Number(amount));
-        await query('UPDATE products SET stock = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [newStock, id]);
+        const newActive = newStock <= 0 ? 0 : 1;
+        await query('UPDATE products SET stock = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [newStock, newActive, id]);
         const updated = await query('SELECT * FROM products WHERE id = ?', [id]);
         return res.status(200).json({ success: true, data: updated.rows[0] });
       }
@@ -320,6 +321,12 @@ export default async function handler(req, res) {
 
       if (method === 'PUT') {
         const { name, price, cost_price, reseller_price, stock, category_id, emoji, barcode, description, is_active } = body;
+        let finalActive = is_active;
+        if (stock !== undefined && Number(stock) <= 0) {
+          finalActive = 0;
+        } else if (stock !== undefined && Number(stock) > 0 && is_active === undefined) {
+          finalActive = 1;
+        }
         await query(`
           UPDATE products SET
             name = COALESCE(?, name),
@@ -334,7 +341,7 @@ export default async function handler(req, res) {
             is_active = COALESCE(?, is_active),
             updated_at = CURRENT_TIMESTAMP
           WHERE id = ?
-        `, [name, price, cost_price, reseller_price, stock, category_id !== undefined ? category_id : null, emoji, barcode, description, is_active, id]);
+        `, [name, price, cost_price, reseller_price, stock, category_id !== undefined ? category_id : null, emoji, barcode, description, finalActive, id]);
         const updated = await query('SELECT * FROM products WHERE id = ?', [id]);
         return res.status(200).json({ success: true, data: updated.rows[0] });
       }
@@ -407,6 +414,23 @@ export default async function handler(req, res) {
       const seq = String((countRes.rows[0]?.count || 0) + 1).padStart(4, '0');
       const invoice_number = `TRX-${dateStr}-${seq}`;
 
+      // Cek ketersediaan stok produk sebelum membuat transaksi
+      for (const item of items) {
+        const productId = item.id || item.product_id || null;
+        if (productId) {
+          const prodCheck = await query('SELECT id, name, stock FROM products WHERE id = ?', [productId]);
+          if (prodCheck.rows.length) {
+            const currentStock = prodCheck.rows[0].stock;
+            if (currentStock < item.quantity) {
+              return res.status(400).json({
+                success: false,
+                error: `Stok produk "${prodCheck.rows[0].name}" tidak mencukupi (sisa ${currentStock}, diminta ${item.quantity})`
+              });
+            }
+          }
+        }
+      }
+
       const insertTrx = await query(`
         INSERT INTO transactions (
           invoice_number, customer_type, total, discount, tax, shipping_cost, shipping_name,
@@ -432,7 +456,14 @@ export default async function handler(req, res) {
 
         const productId = item.id || item.product_id || null;
         if (productId) {
-          await query('UPDATE products SET stock = MAX(0, stock - ?), updated_at = CURRENT_TIMESTAMP WHERE id = ?', [item.quantity, productId]);
+          // Kurangi stok dan otomatis non-aktifkan jika stok habis (<= 0)
+          await query(`
+            UPDATE products 
+            SET stock = MAX(0, stock - ?), 
+                is_active = CASE WHEN (stock - ?) <= 0 THEN 0 ELSE is_active END, 
+                updated_at = CURRENT_TIMESTAMP 
+            WHERE id = ?
+          `, [item.quantity, item.quantity, productId]);
         }
       }
 

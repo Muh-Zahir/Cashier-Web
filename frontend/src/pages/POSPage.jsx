@@ -488,24 +488,47 @@ function CartPanel({ onCheckout }) {
         </div>
       ) : (
         <div className="cart-items">
-          {items.map((item) => (
-            <div key={item.id} className="cart-item">
-              <div className="cart-item-emoji">{item.emoji}</div>
-              <div className="cart-item-info">
-                <div className="cart-item-name">{item.name}</div>
-                <div className="cart-item-price">{formatRupiah(item.price)}</div>
+          {items.map((item) => {
+            const isMax = typeof item.stock === 'number' && item.quantity >= item.stock;
+            return (
+              <div key={item.id} className="cart-item">
+                <div className="cart-item-emoji">{item.emoji}</div>
+                <div className="cart-item-info">
+                  <div className="cart-item-name">{item.name}</div>
+                  <div className="cart-item-price">{formatRupiah(item.price)}</div>
+                  {typeof item.stock === 'number' && (
+                    <div style={{ fontSize: 10, color: isMax ? '#f87171' : 'var(--text-muted)', marginTop: 2 }}>
+                      {isMax ? `Maks. stok (${item.stock})` : `Sisa stok: ${item.stock}`}
+                    </div>
+                  )}
+                </div>
+                <div className="cart-item-controls">
+                  <button className="qty-btn" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
+                    <Minus size={11} />
+                  </button>
+                  <span className="qty-display">{item.quantity}</span>
+                  <button
+                    className="qty-btn"
+                    disabled={isMax}
+                    style={isMax ? { opacity: 0.35, cursor: 'not-allowed' } : {}}
+                    title={isMax ? `Stok maksimal tercapai (${item.stock})` : 'Tambah jumlah'}
+                    onClick={() => {
+                      const res = updateQuantity(item.id, item.quantity + 1);
+                      if (res && !res.success && res.reason === 'max_stock_reached') {
+                        toast.error(`Stok "${item.name}" hanya tersedia ${item.stock}!`, { id: `stock-${item.id}` });
+                      }
+                    }}
+                  >
+                    <Plus size={11} />
+                  </button>
+                </div>
+                <div className="cart-item-subtotal">{formatRupiah(item.price * item.quantity)}</div>
+                <button className="btn btn-danger btn-sm btn-icon" style={{ width: 22, height: 22, borderRadius: 5 }} onClick={() => removeItem(item.id)}>
+                  <X size={11} />
+                </button>
               </div>
-              <div className="cart-item-controls">
-                <button className="qty-btn" onClick={() => updateQuantity(item.id, item.quantity - 1)}><Minus size={11} /></button>
-                <span className="qty-display">{item.quantity}</span>
-                <button className="qty-btn" onClick={() => updateQuantity(item.id, item.quantity + 1)}><Plus size={11} /></button>
-              </div>
-              <div className="cart-item-subtotal">{formatRupiah(item.price * item.quantity)}</div>
-              <button className="btn btn-danger btn-sm btn-icon" style={{ width: 22, height: 22, borderRadius: 5 }} onClick={() => removeItem(item.id)}>
-                <X size={11} />
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -703,9 +726,34 @@ export default function POSPage() {
               const hasResellerPrice = product.reseller_price > 0;
               const activePrice = isResellerMode && hasResellerPrice ? product.reseller_price : product.price;
 
+              const inCartItem = items.find((i) => i.id === product.id);
+              const inCartQty = inCartItem ? inCartItem.quantity : 0;
+              const isCartFull = product.stock > 0 && inCartQty >= product.stock;
+
               return (
-                <div key={product.id} className={`product-card${isOut ? ' out-of-stock' : ''}`}
-                  onClick={() => !isOut && addItem({ ...product, id: product.id })}>
+                <div
+                  key={product.id}
+                  className={`product-card${isOut ? ' out-of-stock' : ''}${isCartFull ? ' cart-full' : ''}`}
+                  onClick={() => {
+                    if (isOut) {
+                      toast.error(`Produk "${product.name}" sudah habis!`, { id: `stock-${product.id}` });
+                      return;
+                    }
+                    if (isCartFull) {
+                      toast.error(`Semua stok "${product.name}" (${product.stock}) sudah ada di keranjang!`, { id: `stock-${product.id}` });
+                      return;
+                    }
+                    const res = addItem({ ...product, id: product.id });
+                    if (res && !res.success) {
+                      if (res.reason === 'max_stock_reached') {
+                        toast.error(`Stok "${product.name}" hanya tersedia ${product.stock}!`, { id: `stock-${product.id}` });
+                      } else if (res.reason === 'out_of_stock') {
+                        toast.error(`Produk "${product.name}" sudah habis!`, { id: `stock-${product.id}` });
+                      }
+                    }
+                  }}
+                  style={isCartFull ? { borderColor: 'rgba(99, 102, 241, 0.4)' } : undefined}
+                >
                   <div className="product-emoji">{product.emoji}</div>
                   <div className="product-name">{product.name}</div>
                   <div className="product-price" style={{ color: isResellerMode && hasResellerPrice ? 'var(--accent)' : undefined }}>
@@ -721,9 +769,16 @@ export default function POSPage() {
                       {isResellerMode ? `Biasa: ${formatRupiah(product.price)}` : `Reseller: ${formatRupiah(product.reseller_price)}`}
                     </div>
                   )}
-                  <span className={`product-stock-badge ${isOut ? 'out' : isLow ? 'low-stock' : 'in-stock'}`}>
-                    {isOut ? 'Habis' : isLow ? `Sisa ${product.stock}` : `Stok ${product.stock}`}
-                  </span>
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center', marginTop: 2 }}>
+                    <span className={`product-stock-badge ${isOut ? 'out' : isLow ? 'low-stock' : 'in-stock'}`}>
+                      {isOut ? 'Habis' : isLow ? `Sisa ${product.stock}` : `Stok ${product.stock}`}
+                    </span>
+                    {inCartQty > 0 && (
+                      <span className="badge badge-purple" style={{ fontSize: 10, padding: '2px 6px', fontWeight: 600 }}>
+                        🛒 {inCartQty}{isCartFull ? ' (Maks)' : ''}
+                      </span>
+                    )}
+                  </div>
                 </div>
               );
             })}

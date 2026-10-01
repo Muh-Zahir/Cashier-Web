@@ -62,7 +62,8 @@ function ProductFormModal({ isOpen, onClose, editProduct, categories, onSaved })
   function handleStockChange(val) {
     const nextStock = val;
     setForm((f) => {
-      const autoActive = !f.is_active && parseInt(nextStock) > 0 ? true : f.is_active;
+      const stockInt = parseInt(nextStock, 10);
+      const autoActive = !isNaN(stockInt) && stockInt <= 0 ? false : (!f.is_active && stockInt > 0 ? true : f.is_active);
       return { ...f, stock: nextStock, is_active: autoActive };
     });
   }
@@ -75,17 +76,18 @@ function ProductFormModal({ isOpen, onClose, editProduct, categories, onSaved })
     }
     setLoading(true);
     try {
+      const stockInt = parseInt(form.stock) || 0;
       const payload = {
         name: form.name,
         price: parseFloat(form.price),
         reseller_price: parseFloat(form.reseller_price) || 0,
         cost_price: parseFloat(form.cost_price) || 0,
-        stock: parseInt(form.stock) || 0,
+        stock: stockInt,
         category_id: form.category_id ? parseInt(form.category_id) : null,
         emoji: form.emoji,
         barcode: form.barcode,
         description: form.description,
-        is_active: form.is_active ? 1 : 0,
+        is_active: stockInt <= 0 ? 0 : (form.is_active ? 1 : 0),
       };
 
       if (editProduct) {
@@ -305,7 +307,7 @@ function RestockModal({ isOpen, onClose, product, onSaved }) {
         emoji: product.emoji || '📦',
         barcode: product.barcode || '',
         description: product.description || '',
-        is_active: newStock > 0 ? 1 : (product.is_active ? 1 : 0),
+        is_active: newStock > 0 ? 1 : 0,
       });
       toast.success(`✅ Stok ${product.name} berhasil ditambah +${jumlah} (Total: ${newStock})`);
       onSaved();
