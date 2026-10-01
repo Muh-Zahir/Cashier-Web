@@ -430,8 +430,9 @@ export default async function handler(req, res) {
           VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `, [transactionId, item.id || null, item.name, item.price, item.cost_price || 0, item.quantity, itemSubtotal, itemProfit]);
 
-        if (item.id) {
-          await query('UPDATE products SET stock = MAX(0, stock - ?), updated_at = CURRENT_TIMESTAMP WHERE id = ?', [item.quantity, item.id]);
+        const productId = item.id || item.product_id || null;
+        if (productId) {
+          await query('UPDATE products SET stock = MAX(0, stock - ?), updated_at = CURRENT_TIMESTAMP WHERE id = ?', [item.quantity, productId]);
         }
       }
 

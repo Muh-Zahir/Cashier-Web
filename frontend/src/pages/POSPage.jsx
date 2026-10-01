@@ -631,7 +631,8 @@ export default function POSPage() {
     try {
       const res = await transactionsApi.create({
         items: cartItems.map((i) => ({
-          product_id: i.id,
+          id: i.id,           // product id untuk update stok
+          product_id: i.id,   // fallback
           name: i.name,
           price: i.price,
           cost_price: i.cost_price || 0,
