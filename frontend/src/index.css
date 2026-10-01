@@ -1317,6 +1317,71 @@ tbody tr:hover td {
 }
 
 /* ===========================
+   TRANSACTION LIST (RESPONSIVE)
+=========================== */
+/* Desktop: show table, hide card list */
+.txn-table-desktop { display: block; }
+.txn-card-list     { display: none; }
+
+/* Card item styles (used on mobile/tablet) */
+.txn-card {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.txn-card:last-child { border-bottom: none; }
+
+.txn-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.txn-card-invoice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: monospace;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.txn-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+.txn-card-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.txn-card-totals {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+.txn-card-total {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+.txn-card-profit {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* ===========================
    RESPONSIVE BASE & CONTROLS
 =========================== */
 .mobile-header { display: none; }
@@ -1767,25 +1832,68 @@ tbody tr:hover td {
     gap: 12px;
   }
 
-  .table-wrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    width: 100%;
-  }
+  /* Transaction: hide desktop table, show card list */
+  .txn-table-desktop { display: none; }
+  .txn-card-list     { display: block; }
 
-  .table-wrapper table {
-    min-width: 600px;
-  }
-
-  /* Modals on Mobile */
+  /* Modals on Mobile - compact, no inner scroll */
   .modal-overlay {
-    padding: 12px;
+    padding: 8px;
+    align-items: flex-end;
   }
 
   .modal {
     width: 100%;
     max-width: 100%;
-    max-height: 92vh;
+    max-height: 95vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    overflow-y: auto;
+  }
+
+  /* Payment Modal compact on mobile */
+  .modal-body {
+    padding: 12px 14px;
+  }
+
+  .modal-header {
+    padding: 12px 14px 10px;
+  }
+
+  .modal-footer {
+    padding: 10px 14px;
+  }
+
+  .payment-keypad {
+    gap: 6px;
+  }
+
+  .keypad-btn {
+    height: 44px;
+    font-size: 16px;
+  }
+
+  .quick-amounts {
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .quick-amount-btn {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  .payment-display {
+    padding: 10px 14px;
+    margin-bottom: 8px;
+  }
+
+  .payment-amount {
+    font-size: 24px;
+  }
+
+  .payment-change {
+    padding: 7px 10px;
+    margin-top: 6px;
   }
 
   /* ===========================

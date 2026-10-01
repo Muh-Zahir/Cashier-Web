@@ -140,9 +140,9 @@ function PaymentModal({ isOpen, onClose, total, onConfirm }) {
           <button className="modal-close" onClick={onClose}><X size={16} /></button>
         </div>
         <div className="modal-body">
-          <div style={{ textAlign: 'center', marginBottom: 18 }}>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>Total Tagihan</div>
-            <div style={{ fontSize: 34, fontWeight: 900, color: 'var(--white)', letterSpacing: '-1px' }}>{formatRupiah(total)}</div>
+        <div style={{ textAlign: 'center', marginBottom: 10 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2 }}>Total Tagihan</div>
+            <div style={{ fontSize: 28, fontWeight: 900, color: 'var(--white)', letterSpacing: '-1px' }}>{formatRupiah(total)}</div>
           </div>
 
           <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>

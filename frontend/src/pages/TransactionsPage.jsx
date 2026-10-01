@@ -248,9 +248,9 @@ export default function TransactionsPage() {
         )}
       </div>
 
-      {/* Transactions Table */}
+      {/* Transactions Table / Card List */}
       <div className="card">
-        <div className="table-wrapper">
+        <div className="txn-table-desktop">
           {loading ? (
             <div className="loading-spinner"><div className="spinner" /></div>
           ) : filtered.length === 0 ? (
@@ -264,7 +264,7 @@ export default function TransactionsPage() {
               <thead>
                 <tr>
                   <th>No. Invoice</th>
-                  <th>Tanggal & Waktu</th>
+                  <th>Tanggal &amp; Waktu</th>
                   <th>Kasir</th>
                   <th>Pengiriman</th>
                   <th>Metode</th>
@@ -336,6 +336,70 @@ export default function TransactionsPage() {
               </tbody>
             </table>
           )}
+        </div>
+
+        {/* Mobile / Tablet: Card-based list (no horizontal scroll) */}
+        <div className="txn-card-list">
+          {loading ? (
+            <div className="loading-spinner"><div className="spinner" /></div>
+          ) : filtered.length === 0 ? (
+            <div className="empty-state">
+              <span className="empty-icon">🧾</span>
+              <p className="empty-title">Belum ada transaksi</p>
+              <p className="empty-text">Mulai berjualan dari halaman Kasir</p>
+            </div>
+          ) : filtered.map((t) => (
+            <div key={t.id} className="txn-card">
+              {/* Row 1: Invoice + badge + actions */}
+              <div className="txn-card-top">
+                <div className="txn-card-invoice">
+                  <span>{t.invoice_number}</span>
+                  {t.customer_type === 'reseller' && (
+                    <span className="badge badge-purple" style={{ fontSize: 9, padding: '1px 5px' }}>Reseller</span>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: 5 }}>
+                  <button className="btn btn-secondary btn-sm btn-icon"
+                    title="Lihat Detail" onClick={() => loadDetail(t.id)}>
+                    <Eye size={13} />
+                  </button>
+                  {isAdmin && (
+                    <button className="btn btn-danger btn-sm btn-icon"
+                      title="Hapus" onClick={() => setDeleteConfirm(t)}>
+                      <Trash2 size={13} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Row 2: Date + Kasir */}
+              <div className="txn-card-meta">
+                <span>{formatDate(t.created_at)}</span>
+                <span>•</span>
+                <span>{t.cashier_name}</span>
+              </div>
+
+              {/* Row 3: Badges row */}
+              <div className="txn-card-badges">
+                <span className={`badge badge-${t.payment_method === 'cash' ? 'success' : 'info'}`} style={{ fontSize: 10 }}>
+                  {t.payment_method === 'cash' ? '💵 Tunai' : '💳 Transfer'}
+                </span>
+                {t.shipping_cost > 0 && (
+                  <span className="badge badge-purple" style={{ fontSize: 10, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                    <Truck size={10} /> {t.shipping_name || 'Ekspedisi'}
+                  </span>
+                )}
+              </div>
+
+              {/* Row 4: Total + Laba */}
+              <div className="txn-card-totals">
+                <span className="txn-card-total">{formatRupiah(t.grand_total)}</span>
+                {isAdmin && (
+                  <span className="txn-card-profit">+{formatRupiah(t.profit || 0)} laba</span>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Pagination */}
