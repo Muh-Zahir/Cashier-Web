@@ -1340,7 +1340,7 @@ tbody tr:hover td {
     min-height: 100vh;
   }
 
-  /* Mobile Header */
+  /* Mobile Header - fixed so it always stays on top */
   .mobile-header {
     display: flex;
     align-items: center;
@@ -1349,10 +1349,17 @@ tbody tr:hover td {
     padding: 0 16px;
     background: var(--gray-900);
     border-bottom: 1px solid var(--border);
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 95;
+    left: 0;
+    right: 0;
+    z-index: 990;
     flex-shrink: 0;
+  }
+
+  /* Push content below fixed header */
+  .main-content-inner {
+    padding-top: 56px;
   }
 
   .mobile-header-left {
@@ -1476,7 +1483,7 @@ tbody tr:hover td {
   }
 
   .pos-products-panel {
-    padding: 16px 16px 85px 16px;
+    padding: 16px 16px 140px 16px;
     height: auto;
     overflow: visible;
   }
@@ -1486,13 +1493,13 @@ tbody tr:hover td {
     gap: 8px;
   }
 
-  /* Floating Cart Bar */
+  /* Floating Cart Bar - sits above bottom nav */
   .pos-mobile-cart-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: fixed;
-    bottom: 20px;
+    bottom: 70px;
     left: 16px;
     right: 16px;
     background: var(--gray-850);
@@ -1583,7 +1590,7 @@ tbody tr:hover td {
 
   /* General Pages */
   .page-wrapper {
-    padding: 18px 16px 80px 16px;
+    padding: 18px 16px 90px 16px;
   }
 
   .stats-grid {
@@ -1616,26 +1623,24 @@ tbody tr:hover td {
     max-width: 100%;
     max-height: 92vh;
   }
-}
 
-/* ===========================
-   SMARTPHONE (< 640px)
-=========================== */
-@media (max-width: 640px) {
-  /* Bottom Navigation Bar */
+  /* ===========================
+     BOTTOM NAVIGATION (Tablet & Mobile)
+  =========================== */
   .mobile-bottom-nav {
     display: flex;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 58px;
-    background: rgba(17, 17, 17, 0.96);
+    height: 60px;
+    background: rgba(17, 17, 17, 0.97);
     backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-top: 1px solid var(--border);
     align-items: center;
     justify-content: space-around;
-    z-index: 900;
+    z-index: 980;
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
@@ -1652,6 +1657,7 @@ tbody tr:hover td {
     flex: 1;
     height: 100%;
     transition: var(--transition);
+    padding: 0;
   }
 
   .bottom-nav-item:hover,
@@ -1676,18 +1682,19 @@ tbody tr:hover td {
     justify-content: center;
     padding: 0 3px;
   }
+}
 
-  /* Raise floating cart bar above bottom nav */
-  .pos-mobile-cart-bar {
-    bottom: 68px;
-  }
-
+/* ===========================
+   SMARTPHONE (< 640px)
+=========================== */
+@media (max-width: 640px) {
+  /* Adjustments specific to small phones */
   .pos-products-panel {
-    padding: 12px 12px 135px 12px;
+    padding: 12px 12px 140px 12px;
   }
 
   .page-wrapper {
-    padding: 16px 12px 75px 12px;
+    padding: 16px 12px 80px 12px;
   }
 
   .page-header {
