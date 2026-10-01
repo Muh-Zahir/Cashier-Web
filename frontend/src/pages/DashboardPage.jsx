@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { dashboardApi } from '../api';
+import { useAuthStore } from '../store/useAuthStore';
 import { formatRupiah, formatDateShort, formatDate } from '../utils/format';
 import {
   TrendingUp, ShoppingCart, Package, AlertTriangle,
@@ -69,6 +70,9 @@ export default function DashboardPage() {
 
   const { today, month, products, topProducts, last7Days, recentTransactions } = data || {};
 
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'admin';
+
   const todayRevenue = today?.total_revenue || 0;
   const todayProfit = today?.total_profit || 0;
   const todayMargin = todayRevenue > 0 ? Math.round((todayProfit / todayRevenue) * 100) : 0;
@@ -98,12 +102,14 @@ export default function DashboardPage() {
           <div className="stat-sub">{today?.transaction_count || 0} transaksi</div>
         </div>
 
-        <div className="stat-card purple">
-          <div className="stat-icon purple"><Wallet size={22} /></div>
-          <div className="stat-label">Laba Bersih Hari Ini</div>
-          <div className="stat-value">{formatRupiah(todayProfit)}</div>
-          <div className="stat-sub">Margin: {todayMargin}% dari omset</div>
-        </div>
+        {isAdmin && (
+          <div className="stat-card purple">
+            <div className="stat-icon purple"><Wallet size={22} /></div>
+            <div className="stat-label">Laba Bersih Hari Ini</div>
+            <div className="stat-value">{formatRupiah(todayProfit)}</div>
+            <div className="stat-sub">Margin: {todayMargin}% dari omset</div>
+          </div>
+        )}
 
         <div className="stat-card green">
           <div className="stat-icon green"><ShoppingCart size={22} /></div>
@@ -112,12 +118,14 @@ export default function DashboardPage() {
           <div className="stat-sub">{month?.transaction_count || 0} transaksi</div>
         </div>
 
-        <div className="stat-card purple">
-          <div className="stat-icon purple"><DollarSign size={22} /></div>
-          <div className="stat-label">Laba Bersih Bulan Ini</div>
-          <div className="stat-value">{formatRupiah(monthProfit)}</div>
-          <div className="stat-sub">Margin: {monthMargin}% bulan ini</div>
-        </div>
+        {isAdmin && (
+          <div className="stat-card purple">
+            <div className="stat-icon purple"><DollarSign size={22} /></div>
+            <div className="stat-label">Laba Bersih Bulan Ini</div>
+            <div className="stat-value">{formatRupiah(monthProfit)}</div>
+            <div className="stat-sub">Margin: {monthMargin}% bulan ini</div>
+          </div>
+        )}
       </div>
 
       {/* Secondary Quick Stats */}
@@ -217,7 +225,7 @@ export default function DashboardPage() {
                       <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
                         {p.total_sold} terjual
                       </div>
-                      {p.total_profit > 0 && (
+                      {isAdmin && p.total_profit > 0 && (
                         <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
                           Laba: +{formatRupiah(p.total_profit)}
                         </div>
@@ -252,7 +260,7 @@ export default function DashboardPage() {
                   <th>No. Invoice</th>
                   <th>Waktu</th>
                   <th>Pengiriman</th>
-                  <th style={{ textAlign: 'right' }}>Laba Bersih</th>
+                  {isAdmin && <th style={{ textAlign: 'right' }}>Laba Bersih</th>}
                   <th style={{ textAlign: 'right' }}>Total</th>
                 </tr>
               </thead>
@@ -272,9 +280,11 @@ export default function DashboardPage() {
                         <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>Ambil di Toko</span>
                       )}
                     </td>
-                    <td style={{ textAlign: 'right', fontWeight: 600, color: (t.profit || 0) >= 0 ? 'var(--text-primary)' : '#ff5555' }}>
-                      +{formatRupiah(t.profit || 0)}
-                    </td>
+                    {isAdmin && (
+                      <td style={{ textAlign: 'right', fontWeight: 600, color: (t.profit || 0) >= 0 ? 'var(--text-primary)' : '#ff5555' }}>
+                        +{formatRupiah(t.profit || 0)}
+                      </td>
+                    )}
                     <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)' }}>
                       {formatRupiah(t.grand_total)}
                     </td>

@@ -80,7 +80,7 @@ function TransactionDetail({ transaction, onClose, isAdmin }) {
                   <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{item.product_name}</div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                     {item.quantity}x {formatRupiah(item.product_price)}
-                    {item.product_cost > 0 && (
+                    {isAdmin && item.product_cost > 0 && (
                       <span> • Modal: {formatRupiah(item.product_cost)}</span>
                     )}
                   </div>
@@ -89,7 +89,7 @@ function TransactionDetail({ transaction, onClose, isAdmin }) {
                   <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
                     {formatRupiah(item.subtotal)}
                   </div>
-                  {item.profit !== undefined && (
+                  {isAdmin && item.profit !== undefined && (
                     <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
                       Laba: +{formatRupiah(item.profit)}
                     </div>

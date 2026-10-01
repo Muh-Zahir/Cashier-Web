@@ -409,6 +409,8 @@ function CartPanel({ onCheckout }) {
     discount, discountType, setDiscount, shippingEnabled, shippingCost, shippingName,
     customerType, setCustomerType,
   } = useCartStore();
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'admin';
 
   const [showDiscount, setShowDiscount] = useState(false);
   const [discountInput, setDiscountInput] = useState('');
@@ -536,8 +538,8 @@ function CartPanel({ onCheckout }) {
               <span className="value">{formatRupiah(total)}</span>
             </div>
 
-            {/* Profit estimate */}
-            {profit > 0 && (
+            {/* Profit estimate — admin only */}
+            {isAdmin && profit > 0 && (
               <div style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 padding: '7px 10px', background: 'rgba(163,230,199,0.08)',
