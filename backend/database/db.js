@@ -131,30 +131,35 @@ const categoriesCount = db.prepare('SELECT COUNT(*) as count FROM categories').g
 if (categoriesCount.count === 0) {
   const insertCategory = db.prepare('INSERT INTO categories (name, color) VALUES (?, ?)');
   const categories = [
-    ['Makanan', '#f59e0b'],
-    ['Minuman', '#06b6d4'],
-    ['Snack', '#ec4899'],
-    ['Elektronik', '#8b5cf6'],
-    ['Lainnya', '#6b7280'],
+    ['Broco Standard', '#3b82f6'],
+    ['Broco Multi Gang', '#8b5cf6'],
+    ['Broco MCB & Box', '#f59e0b'],
+    ['Broco Atlantic', '#06b6d4'],
+    ['Broco Gracio', '#10b981'],
+    ['Broco Galleo', '#ec4899'],
+    ['Uticon Series', '#6366f1'],
+    ['Kabel Eterna', '#ef4444'],
+    ['Panasonic Series', '#14b8a6'],
   ];
   categories.forEach(([name, color]) => insertCategory.run(name, color));
 
   const insertProduct = db.prepare(`
-    INSERT INTO products (name, price, cost_price, stock, category_id, emoji) VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO products (name, price, cost_price, reseller_price, stock, category_id, emoji, barcode, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   const products = [
-    ['Nasi Goreng',      15000, 8000,  50,  1, '🍳'],
-    ['Mie Ayam',         12000, 6000,  40,  1, '🍜'],
-    ['Ayam Bakar',       20000, 11000, 30,  1, '🍗'],
-    ['Es Teh',            5000, 1500,  100, 2, '🧋'],
-    ['Kopi Hitam',        8000, 3000,  80,  2, '☕'],
-    ['Jus Jeruk',        10000, 4000,  60,  2, '🍊'],
-    ['Keripik Singkong',  7000, 3500,  150, 3, '🥨'],
-    ['Coklat Wafer',      5000, 2500,  200, 3, '🍫'],
-    ['Kacang Goreng',     8000, 4000,  100, 3, '🥜'],
+    ['Fitting Plafon', 10000, 5136, 6436, 50, 1, '💡', '210L', 1],
+    ['Fitting Gantung', 10000, 4976, 5976, 50, 1, '💡', '216L', 1],
+    ['Fitting Kombinasi', 16000, 9360, 10360, 50, 1, '💡', '226', 1],
+    ['Fitting Plafon Besar', 18000, 10016, 12410, 50, 1, '💡', '1210', 1],
+    ['Saklar Engkel New Gee Urea', 20000, 12211, 15376, 50, 1, '🔘', '6621U', 1],
+    ['Saklar Seri New Gee Urea', 28000, 16595, 19576, 50, 1, '🔘', '6622U', 1],
+    ['Stop Kontak Arde Outbow Persegi Cream', 20000, 13714, 15895, 50, 1, '🔌', '1541011', 1],
+    ['Steker Biasa', 10000, 3560, 4556, 50, 1, '🔌', '344 L', 1],
+    ['STOP KONTAK UTICON 1 LBNG', 13000, 7020, 8520, 50, 7, '🔌', 'ST-181', 1],
+    ['STOP KONTAK UTICON 3 LBNG', 25000, 15776, 17740, 50, 7, '🔌', 'ST-183', 1],
   ];
-  products.forEach(([name, price, cost_price, stock, cat, emoji]) =>
-    insertProduct.run(name, price, cost_price, stock, cat, emoji)
+  products.forEach(([name, price, cost_price, reseller_price, stock, cat, emoji, barcode, is_active]) =>
+    insertProduct.run(name, price, cost_price, reseller_price, stock, cat, emoji, barcode, is_active)
   );
 }
 
