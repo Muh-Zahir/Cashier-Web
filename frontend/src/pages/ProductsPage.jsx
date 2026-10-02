@@ -479,9 +479,9 @@ export default function ProductsPage() {
         </select>
       </div>
 
-      {/* Products Table */}
+      {/* Products Table (Desktop) */}
       <div className="card">
-        <div className="table-wrapper">
+        <div className="txn-table-desktop">
           {loading ? (
             <div className="loading-spinner"><div className="spinner" /></div>
           ) : filtered.length === 0 ? (
@@ -550,12 +550,8 @@ export default function ProductsPage() {
                       <td style={{ textAlign: 'right', fontSize: 13 }}>
                         {hasResellerPrice ? (
                           <div>
-                            <span style={{ fontWeight: 700, color: 'var(--white)' }}>
-                              {formatRupiah(p.reseller_price)}
-                            </span>
-                            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                              Hemat {formatRupiah(p.price - p.reseller_price)}
-                            </div>
+                            <span style={{ fontWeight: 700, color: 'var(--white)' }}>{formatRupiah(p.reseller_price)}</span>
+                            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Hemat {formatRupiah(p.price - p.reseller_price)}</div>
                           </div>
                         ) : (
                           <span style={{ color: 'var(--text-muted)' }}>—</span>
@@ -589,13 +585,10 @@ export default function ProductsPage() {
                       </td>
                       <td style={{ textAlign: 'center' }}>
                         {isAdmin ? (
-                          <button
-                            type="button"
-                            onClick={() => handleToggleStatus(p)}
+                          <button type="button" onClick={() => handleToggleStatus(p)}
                             className={`badge ${isActive ? 'badge-success' : 'badge-danger'}`}
-                            style={{ cursor: 'pointer', border: 'none', display: 'inline-flex', alignItems: 'center', gap: 4, transition: 'all 0.15s ease' }}
-                            title={isActive ? 'Klik untuk nonaktifkan produk' : 'Klik untuk mengaktifkan kembali'}
-                          >
+                            style={{ cursor: 'pointer', border: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                            title={isActive ? 'Klik untuk nonaktifkan' : 'Klik untuk aktifkan'}>
                             {isActive ? '● Aktif' : '○ Nonaktif'}
                           </button>
                         ) : (
@@ -609,28 +602,24 @@ export default function ProductsPage() {
                           {isAdmin ? (
                             <>
                               <button className="btn btn-secondary btn-sm btn-icon"
-                                title="Edit & Restok Produk" onClick={() => { setEditProduct(p); setShowModal(true); }}>
+                                title="Edit & Restok" onClick={() => { setEditProduct(p); setShowModal(true); }}>
                                 <Edit2 size={14} />
                               </button>
                               {isActive ? (
                                 <button className="btn btn-secondary btn-sm btn-icon"
-                                  title="Nonaktifkan Produk" onClick={() => setDeleteConfirm(p)}>
+                                  title="Nonaktifkan" onClick={() => setDeleteConfirm(p)}>
                                   <PowerOff size={14} style={{ color: 'var(--danger)' }} />
                                 </button>
                               ) : (
                                 <button className="btn btn-primary btn-sm btn-icon"
-                                  title="Aktifkan Kembali Produk Ini" onClick={() => handleToggleStatus(p)}>
+                                  title="Aktifkan Kembali" onClick={() => handleToggleStatus(p)}>
                                   <Check size={14} />
                                 </button>
                               )}
                             </>
                           ) : (
-                            <button
-                              className="btn btn-secondary btn-sm"
-                              style={{ gap: 5, padding: '5px 10px', fontSize: 12 }}
-                              title="Input Stok Masuk"
-                              onClick={() => setRestockProduct(p)}
-                            >
+                            <button className="btn btn-secondary btn-sm" style={{ gap: 5, padding: '5px 10px', fontSize: 12 }}
+                              title="Input Stok Masuk" onClick={() => setRestockProduct(p)}>
                               <PackagePlus size={13} /> Restock
                             </button>
                           )}
@@ -642,6 +631,99 @@ export default function ProductsPage() {
               </tbody>
             </table>
           )}
+        </div>
+
+        {/* Mobile / Tablet: Product Card List */}
+        <div className="txn-card-list">
+          {loading ? (
+            <div className="loading-spinner"><div className="spinner" /></div>
+          ) : filtered.length === 0 ? (
+            <div className="empty-state">
+              <span className="empty-icon">📦</span>
+              <p className="empty-title">Tidak ada produk</p>
+              <p className="empty-text">
+                {statusFilter === 'inactive' ? 'Tidak ada produk nonaktif' : 'Tambah produk baru untuk memulai'}
+              </p>
+            </div>
+          ) : filtered.map((p) => {
+            const isLow = p.stock <= 10 && p.stock > 0;
+            const isOut = p.stock <= 0;
+            const isActive = (p.is_active === 1 || p.is_active === true) && p.stock > 0;
+            const hasResellerPrice = p.reseller_price > 0;
+
+            return (
+              <div key={p.id} className="prod-card" style={{ opacity: isActive ? 1 : 0.7 }}>
+                {/* Row 1: Emoji + name + actions */}
+                <div className="prod-card-top">
+                  <div className="prod-card-identity">
+                    <span className="prod-card-emoji">{p.emoji}</span>
+                    <div>
+                      <div className="prod-card-name">{p.name}</div>
+                      {p.category_name && (
+                        <span className="badge badge-purple" style={{ fontSize: 9, padding: '1px 5px', marginTop: 2, display: 'inline-block' }}>
+                          {p.category_name}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+                    {isAdmin ? (
+                      <>
+                        <button className="btn btn-secondary btn-sm btn-icon"
+                          title="Edit" onClick={() => { setEditProduct(p); setShowModal(true); }}>
+                          <Edit2 size={13} />
+                        </button>
+                        {isActive ? (
+                          <button className="btn btn-secondary btn-sm btn-icon"
+                            onClick={() => setDeleteConfirm(p)}>
+                            <PowerOff size={13} style={{ color: 'var(--danger)' }} />
+                          </button>
+                        ) : (
+                          <button className="btn btn-primary btn-sm btn-icon"
+                            onClick={() => handleToggleStatus(p)}>
+                            <Check size={13} />
+                          </button>
+                        )}
+                      </>
+                    ) : (
+                      <button className="btn btn-secondary btn-sm" style={{ fontSize: 11, padding: '4px 9px', gap: 4 }}
+                        onClick={() => setRestockProduct(p)}>
+                        <PackagePlus size={12} /> Restock
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Row 2: Price + stock + status */}
+                <div className="prod-card-row2">
+                  <div>
+                    <div className="prod-card-price">{formatRupiah(p.price)}</div>
+                    {hasResellerPrice && (
+                      <div className="prod-card-reseller">Reseller: {formatRupiah(p.reseller_price)}</div>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span className={`badge ${isOut ? 'badge-danger' : isLow ? 'badge-warning' : 'badge-success'}`}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 10 }}>
+                      {isLow && <AlertTriangle size={9} />}
+                      Stok {p.stock}
+                    </span>
+                    {isAdmin ? (
+                      <button type="button" onClick={() => handleToggleStatus(p)}
+                        className={`badge ${isActive ? 'badge-success' : 'badge-danger'}`}
+                        style={{ cursor: 'pointer', border: 'none', fontSize: 10, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                        {isActive ? '● Aktif' : '○ Nonaktif'}
+                      </button>
+                    ) : (
+                      <span className={`badge ${isActive ? 'badge-success' : 'badge-danger'}`} style={{ fontSize: 10 }}>
+                        {isActive ? '● Aktif' : '○ Nonaktif'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
