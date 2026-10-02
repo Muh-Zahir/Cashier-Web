@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { productsApi, transactionsApi } from '../api';
 import useCartStore from '../store/useCartStore';
@@ -507,41 +507,69 @@ function CartPanel({ onCheckout, mobileOpen = false, onCloseMobile }) {
           {items.map((item) => {
             const isMax = typeof item.stock === 'number' && item.quantity >= item.stock;
             return (
-              <div key={item.id} className="cart-item">
-                <div className="cart-item-emoji">{item.emoji}</div>
-                <div className="cart-item-info">
-                  <div className="cart-item-name">{item.name}</div>
-                  <div className="cart-item-price">{formatRupiah(item.price)}</div>
-                  {typeof item.stock === 'number' && (
-                    <div style={{ fontSize: 10, color: isMax ? '#f87171' : 'var(--text-muted)', marginTop: 2 }}>
-                      {isMax ? `Maks. stok (${item.stock})` : `Sisa stok: ${item.stock}`}
-                    </div>
-                  )}
-                </div>
-                <div className="cart-item-controls">
-                  <button className="qty-btn" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
-                    <Minus size={11} />
-                  </button>
-                  <span className="qty-display">{item.quantity}</span>
+              <div key={item.id} className="cart-item-card">
+                {/* Baris 1: Emoji, Nama Lengkap, Article/Kode, Tombol Hapus */}
+                <div className="cart-item-top">
+                  <div className="cart-item-emoji">{item.emoji || '📦'}</div>
+                  <div className="cart-item-header-info">
+                    <div className="cart-item-name" title={item.name}>{item.name}</div>
+                    {item.barcode && (
+                      <div className="cart-item-article">🏷️ {item.barcode}</div>
+                    )}
+                  </div>
                   <button
-                    className="qty-btn"
-                    disabled={isMax}
-                    style={isMax ? { opacity: 0.35, cursor: 'not-allowed' } : {}}
-                    title={isMax ? `Stok maksimal tercapai (${item.stock})` : 'Tambah jumlah'}
-                    onClick={() => {
-                      const res = updateQuantity(item.id, item.quantity + 1);
-                      if (res && !res.success && res.reason === 'max_stock_reached') {
-                        toast.error(`Stok "${item.name}" hanya tersedia ${item.stock}!`, { id: `stock-${item.id}` });
-                      }
-                    }}
+                    type="button"
+                    className="cart-item-delete-btn"
+                    onClick={() => removeItem(item.id)}
+                    title="Hapus dari keranjang"
                   >
-                    <Plus size={11} />
+                    <X size={13} />
                   </button>
                 </div>
-                <div className="cart-item-subtotal">{formatRupiah(item.price * item.quantity)}</div>
-                <button className="btn btn-danger btn-sm btn-icon" style={{ width: 22, height: 22, borderRadius: 5 }} onClick={() => removeItem(item.id)}>
-                  <X size={11} />
-                </button>
+
+                {/* Baris 2: Harga & Stok di kiri, Qty Controls & Subtotal di kanan */}
+                <div className="cart-item-bottom">
+                  <div className="cart-item-meta">
+                    <span className="cart-item-unit-price">{formatRupiah(item.price)}</span>
+                    {typeof item.stock === 'number' && (
+                      <span className={`cart-item-stock-tag${isMax ? ' max' : ''}`}>
+                        {isMax ? `Maks (${item.stock})` : `Sisa ${item.stock}`}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="cart-item-actions">
+                    <div className="cart-item-controls">
+                      <button
+                        type="button"
+                        className="qty-btn"
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        title="Kurangi"
+                      >
+                        <Minus size={11} />
+                      </button>
+                      <span className="qty-display">{item.quantity}</span>
+                      <button
+                        type="button"
+                        className="qty-btn"
+                        disabled={isMax}
+                        style={isMax ? { opacity: 0.35, cursor: 'not-allowed' } : {}}
+                        title={isMax ? `Stok maksimal tercapai (${item.stock})` : 'Tambah jumlah'}
+                        onClick={() => {
+                          const res = updateQuantity(item.id, item.quantity + 1);
+                          if (res && !res.success && res.reason === 'max_stock_reached') {
+                            toast.error(`Stok "${item.name}" hanya tersedia ${item.stock}!`, { id: `stock-${item.id}` });
+                          }
+                        }}
+                      >
+                        <Plus size={11} />
+                      </button>
+                    </div>
+                    <div className="cart-item-subtotal">
+                      {formatRupiah(item.price * item.quantity)}
+                    </div>
+                  </div>
+                </div>
               </div>
             );
           })}
@@ -628,11 +656,22 @@ function CartPanel({ onCheckout, mobileOpen = false, onCloseMobile }) {
   );
 }
 
+const KNOWN_BRANDS = ['Broco', 'Uticon', 'Eterna', 'Panasonic', 'Schneider', 'Philips'];
+
+function getCategoryBrand(catName) {
+  if (!catName) return 'Lainnya';
+  for (const b of KNOWN_BRANDS) {
+    if (new RegExp(b, 'i').test(catName)) return b;
+  }
+  return catName;
+}
+
 // ====== MAIN POS PAGE ======
 export default function POSPage() {
   const { user } = useAuthStore();
   const [products, setProducts]   = useState([]);
   const [categories, setCategories] = useState([]);
+  const [selectedBrand, setSelectedBrand] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [search, setSearch]       = useState('');
   const [loading, setLoading]     = useState(true);
@@ -661,11 +700,54 @@ export default function POSPage() {
     }
   }
 
+  // Daftar merek unik dari kategori yang tersedia
+  const availableBrands = useMemo(() => {
+    const brandsSet = new Set();
+    categories.forEach((cat) => {
+      brandsSet.add(getCategoryBrand(cat.name));
+    });
+    return Array.from(brandsSet);
+  }, [categories]);
+
+  // Hitung jumlah produk per merek
+  const brandProductCounts = useMemo(() => {
+    const counts = { all: products.length };
+    availableBrands.forEach((b) => {
+      counts[b] = products.filter((p) => {
+        const cat = categories.find((c) => c.id === p.category_id);
+        const bName = cat ? getCategoryBrand(cat.name) : 'Lainnya';
+        return bName === b;
+      }).length;
+    });
+    return counts;
+  }, [products, categories, availableBrands]);
+
+  // Sub-kategori untuk merek yang sedang dipilih
+  const activeBrandCategories = useMemo(() => {
+    if (selectedBrand === 'all') return [];
+    return categories.filter((c) => getCategoryBrand(c.name) === selectedBrand);
+  }, [categories, selectedBrand]);
+
+  // Label sub-kategori bersih (e.g. "Broco Standard" -> "Standard", "Kabel Eterna" -> "Kabel")
+  function getSubcategoryLabel(catName, brand) {
+    if (!catName || !brand) return catName;
+    const cleaned = catName.replace(new RegExp(brand, 'i'), '').trim();
+    return cleaned || catName;
+  }
+
   const filteredProducts = products.filter((p) => {
+    const cat = categories.find((c) => c.id === p.category_id);
+    const pBrand = cat ? getCategoryBrand(cat.name) : 'Lainnya';
+
+    const matchBrand = selectedBrand === 'all' || pBrand === selectedBrand;
     const matchCat = selectedCategory === 'all' || p.category_id === selectedCategory;
     const sLower = search.toLowerCase();
-    const matchSearch = !search || p.name.toLowerCase().includes(sLower) || (p.barcode && p.barcode.toLowerCase().includes(sLower));
-    return matchCat && matchSearch;
+    const matchSearch =
+      !search ||
+      p.name.toLowerCase().includes(sLower) ||
+      (p.barcode && p.barcode.toLowerCase().includes(sLower));
+
+    return matchBrand && matchCat && matchSearch;
   });
 
   async function handleCheckout({ amount_paid, payment_method }) {
@@ -716,16 +798,61 @@ export default function POSPage() {
             onChange={(e) => setSearch(e.target.value)} />
         </div>
 
-        <div className="category-tabs">
-          <button className={`category-tab${selectedCategory === 'all' ? ' active' : ''}`} onClick={() => setSelectedCategory('all')}>
-            Semua
-          </button>
-          {categories.map((cat) => (
-            <button key={cat.id} className={`category-tab${selectedCategory === cat.id ? ' active' : ''}`}
-              onClick={() => setSelectedCategory(cat.id)}>
-              {cat.name}
+        {/* Filter per Merek & Seri */}
+        <div className="brand-filter-wrapper">
+          <div className="brand-tabs">
+            <button
+              type="button"
+              className={`brand-tab${selectedBrand === 'all' ? ' active' : ''}`}
+              onClick={() => {
+                setSelectedBrand('all');
+                setSelectedCategory('all');
+              }}
+            >
+              🏷️ Semua Merek
+              <span className="brand-tab-count">{brandProductCounts.all || 0}</span>
             </button>
-          ))}
+            {availableBrands.map((brand) => (
+              <button
+                type="button"
+                key={brand}
+                className={`brand-tab${selectedBrand === brand ? ' active' : ''}`}
+                onClick={() => {
+                  setSelectedBrand(brand);
+                  setSelectedCategory('all');
+                }}
+              >
+                {brand}
+                {brandProductCounts[brand] !== undefined && (
+                  <span className="brand-tab-count">{brandProductCounts[brand]}</span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Sub-series pills jika merek memiliki beberapa sub-kategori/seri */}
+          {activeBrandCategories.length > 1 && (
+            <div className="sub-category-tabs">
+              <span className="sub-category-label">Seri:</span>
+              <button
+                type="button"
+                className={`sub-category-pill${selectedCategory === 'all' ? ' active' : ''}`}
+                onClick={() => setSelectedCategory('all')}
+              >
+                Semua {selectedBrand}
+              </button>
+              {activeBrandCategories.map((cat) => (
+                <button
+                  type="button"
+                  key={cat.id}
+                  className={`sub-category-pill${selectedCategory === cat.id ? ' active' : ''}`}
+                  onClick={() => setSelectedCategory(cat.id)}
+                >
+                  {getSubcategoryLabel(cat.name, selectedBrand)}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {loading ? (
