@@ -30,7 +30,7 @@ function Receipt({ transaction, onClose }) {
         <div style={{ marginBottom: 8 }}>
           {[
             ['No. Invoice', transaction.invoice_number],
-            ['Pelanggan', transaction.customer_type === 'reseller' ? '🏷️ Reseller (Grosir)' : '👤 Pelanggan Umum'],
+            ['Tipe Harga', transaction.customer_type === 'reseller' ? '🏷️ Harga Supplier' : '👤 Harga Toko'],
             ['Kasir', transaction.cashier_name],
             ...(isDelivery ? [
               ['Ekspedisi', transaction.shipping_name],
@@ -462,7 +462,7 @@ function CartPanel({ onCheckout, mobileOpen = false, onCloseMobile }) {
           </div>
         </div>
 
-      {/* Customer Type Selector (Umum vs Reseller) */}
+      {/* Customer Type Selector (Toko vs Supplier) */}
       <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)', background: 'var(--bg-secondary)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
           <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.4px', textTransform: 'uppercase' }}>
@@ -470,7 +470,7 @@ function CartPanel({ onCheckout, mobileOpen = false, onCloseMobile }) {
           </span>
           {customerType === 'reseller' && (
             <span className="badge badge-purple" style={{ fontSize: 10, padding: '2px 6px' }}>
-              Mode Reseller Aktif
+              Mode Supplier Aktif
             </span>
           )}
         </div>
@@ -481,7 +481,7 @@ function CartPanel({ onCheckout, mobileOpen = false, onCloseMobile }) {
             style={{ fontSize: 12, padding: '6px 8px', justifyContent: 'center' }}
             onClick={() => setCustomerType('regular')}
           >
-            👤 Umum
+            👤 Toko
           </button>
           <button
             type="button"
@@ -489,7 +489,7 @@ function CartPanel({ onCheckout, mobileOpen = false, onCloseMobile }) {
             style={{ fontSize: 12, padding: '6px 8px', justifyContent: 'center' }}
             onClick={() => setCustomerType('reseller')}
           >
-            🏷️ Reseller
+            🏷️ Supplier
           </button>
         </div>
       </div>
@@ -783,7 +783,7 @@ export default function POSPage() {
                       marginBottom: 6,
                       color: isResellerMode ? 'var(--text-muted)' : 'var(--text-secondary)',
                     }}>
-                      {isResellerMode ? `Biasa: ${formatRupiah(product.price)}` : `Reseller: ${formatRupiah(product.reseller_price)}`}
+                      {isResellerMode ? `Toko: ${formatRupiah(product.price)}` : `Supplier: ${formatRupiah(product.reseller_price)}`}
                     </div>
                   )}
                   <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center', marginTop: 2 }}>

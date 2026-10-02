@@ -71,7 +71,7 @@ function ProductFormModal({ isOpen, onClose, editProduct, categories, onSaved })
   async function handleSubmit(e) {
     e.preventDefault();
     if (!form.name || !form.price) {
-      toast.error('Nama dan harga jual biasa wajib diisi');
+      toast.error('Nama dan harga toko wajib diisi');
       return;
     }
     setLoading(true);
@@ -160,20 +160,20 @@ function ProductFormModal({ isOpen, onClose, editProduct, categories, onSaved })
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} required />
         </div>
 
-        {/* Pricing Grid: Harga Biasa vs Reseller vs Modal */}
+        {/* Pricing Grid: Harga Toko vs Supplier vs Modal */}
         <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
           <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Tag size={15} /> Pengaturan Harga Jual & Reseller
+            <Tag size={15} /> Pengaturan Harga Toko & Supplier
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div className="form-group">
-              <label className="form-label">Harga Biasa (Retail) *</label>
+              <label className="form-label">Harga Toko *</label>
               <input type="number" className="form-input" placeholder="0" value={form.price}
                 onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))} required min={0} />
-              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Untuk pelanggan umum</span>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Harga standar / toko</span>
             </div>
             <div className="form-group">
-              <label className="form-label">Harga Reseller (Grosir)</label>
+              <label className="form-label">Harga Supplier</label>
               <input type="number" className="form-input" placeholder="0" value={form.reseller_price}
                 onChange={(e) => setForm((f) => ({ ...f, reseller_price: e.target.value }))} min={0} />
               <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Kosongkan / 0 jika sama</span>
@@ -184,7 +184,7 @@ function ProductFormModal({ isOpen, onClose, editProduct, categories, onSaved })
             <label className="form-label">Harga Modal / HPP (Rp)</label>
             <input type="number" className="form-input" placeholder="0" value={form.cost_price}
               onChange={(e) => setForm((f) => ({ ...f, cost_price: e.target.value }))} min={0} />
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Modal pokok barang untuk hitung laba</span>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Modal pokok barang untuk hitung laba</span>
           </div>
 
           {/* Profit Comparison Preview */}
@@ -199,14 +199,14 @@ function ProductFormModal({ isOpen, onClose, editProduct, categories, onSaved })
               fontSize: 12,
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>Laba Pelanggan Biasa:</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Laba Harga Toko:</span>
                 <span style={{ fontWeight: 700, color: normalProfit >= 0 ? 'var(--text-primary)' : '#ff5555' }}>
                   +{formatRupiah(normalProfit)} <span style={{ color: 'var(--text-muted)' }}>({normalMargin}%)</span>
                 </span>
               </div>
               {resellerNum > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Laba Reseller:</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>Laba Supplier:</span>
                   <span style={{ fontWeight: 700, color: resellerProfit >= 0 ? 'var(--text-primary)' : '#ff5555' }}>
                     +{formatRupiah(resellerProfit)} <span style={{ color: 'var(--text-muted)' }}>({resellerMargin}%)</span>
                   </span>
@@ -508,8 +508,8 @@ export default function ProductsPage() {
                 <tr>
                   <th>Produk</th>
                   <th>Kategori</th>
-                  <th style={{ textAlign: 'right' }}>Harga Biasa</th>
-                  <th style={{ textAlign: 'right' }}>Harga Reseller</th>
+                  <th style={{ textAlign: 'right' }}>Harga Toko</th>
+                  <th style={{ textAlign: 'right' }}>Harga Supplier</th>
                   {isAdmin && <th style={{ textAlign: 'right' }}>Harga Modal</th>}
                   {isAdmin && <th style={{ textAlign: 'right' }}>Estimasi Laba</th>}
                   <th style={{ textAlign: 'center' }}>Stok</th>
@@ -699,7 +699,7 @@ export default function ProductsPage() {
                   <div>
                     <div className="prod-card-price">{formatRupiah(p.price)}</div>
                     {hasResellerPrice && (
-                      <div className="prod-card-reseller">Reseller: {formatRupiah(p.reseller_price)}</div>
+                      <div className="prod-card-reseller">Supplier: {formatRupiah(p.reseller_price)}</div>
                     )}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

@@ -23,7 +23,7 @@ function TransactionDetail({ transaction, onClose, isAdmin }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
             {[
               ['No. Invoice', transaction.invoice_number],
-              ['Tipe Pelanggan', transaction.customer_type === 'reseller' ? '🏷️ Reseller (Grosir)' : '👤 Pelanggan Biasa'],
+              ['Tipe Harga', transaction.customer_type === 'reseller' ? '🏷️ Harga Supplier' : '👤 Harga Toko'],
               ['Tanggal', formatDate(transaction.created_at)],
               ['Kasir', transaction.cashier_name],
               ['Metode Bayar', transaction.payment_method === 'cash' ? '💵 Tunai' : '💳 Transfer'],
@@ -283,7 +283,7 @@ export default function TransactionsPage() {
                         </span>
                         {t.customer_type === 'reseller' && (
                           <span className="badge badge-purple" style={{ fontSize: 10, padding: '1px 5px' }}>
-                            Reseller
+                            Supplier
                           </span>
                         )}
                       </div>
@@ -355,7 +355,7 @@ export default function TransactionsPage() {
                 <div className="txn-card-invoice">
                   <span>{t.invoice_number}</span>
                   {t.customer_type === 'reseller' && (
-                    <span className="badge badge-purple" style={{ fontSize: 9, padding: '1px 5px' }}>Reseller</span>
+                    <span className="badge badge-purple" style={{ fontSize: 9, padding: '1px 5px' }}>Supplier</span>
                   )}
                 </div>
                 <div style={{ display: 'flex', gap: 5 }}>
