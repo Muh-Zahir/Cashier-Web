@@ -55,6 +55,11 @@ export const PRICE_LABELS = isPFFJ
       pricingSectionTitle: 'Pengaturan Harga Jual & Reseller',
       priceCatalogRegular: (price) => `Biasa: ${price}`,
       priceCatalogSpecial: (price) => `Reseller: ${price}`,
+
+      codeLabel: 'Barcode (Opsional)',
+      codePlaceholder: 'Nomor barcode...',
+      codeShort: 'Barcode',
+      searchPlaceholder: 'Cari nama produk atau barcode...',
     }
   : {
       // === PLM CLIENT (Harga Toko & Harga Supplier) ===
@@ -79,4 +84,9 @@ export const PRICE_LABELS = isPFFJ
       pricingSectionTitle: 'Pengaturan Harga Toko & Supplier',
       priceCatalogRegular: (price) => `Toko: ${price}`,
       priceCatalogSpecial: (price) => `Supplier: ${price}`,
+
+      codeLabel: 'Article / Kode Barang (Opsional)',
+      codePlaceholder: 'Contoh: ART-001, KD-102...',
+      codeShort: 'Article',
+      searchPlaceholder: 'Cari nama produk, article, atau kode...',
     };

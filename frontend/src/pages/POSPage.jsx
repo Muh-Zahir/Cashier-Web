@@ -337,7 +337,7 @@ function ShippingSection() {
                 onClick={() => setDropdownOpen(p => !p)}
                 style={{
                   width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '7px 10px', fontSize: 12, fontWeight: 600,
+                  padding: '8px 14px', fontSize: 12, fontWeight: 600,
                   background: 'var(--surface)', border: '1px solid var(--border)',
                   borderRadius: 7, color: selectedExp ? 'var(--text-primary)' : 'var(--text-muted)',
                   cursor: 'pointer', transition: 'var(--transition)',
@@ -601,7 +601,7 @@ function CartPanel({ onCheckout, mobileOpen = false, onCloseMobile }) {
           {/* Discount */}
           {showDiscount ? (
             <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-              <select className="form-select" style={{ width: 70, padding: '7px 8px', fontSize: 12 }}
+              <select className="form-select" style={{ width: 84, padding: '7px 26px 7px 10px', backgroundPosition: 'calc(100% - 8px) center', fontSize: 12 }}
                 value={discountTypeInput} onChange={(e) => setDiscountTypeInput(e.target.value)}>
                 <option value="percent">%</option>
                 <option value="fixed">Rp</option>
@@ -663,7 +663,8 @@ export default function POSPage() {
 
   const filteredProducts = products.filter((p) => {
     const matchCat = selectedCategory === 'all' || p.category_id === selectedCategory;
-    const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
+    const sLower = search.toLowerCase();
+    const matchSearch = !search || p.name.toLowerCase().includes(sLower) || (p.barcode && p.barcode.toLowerCase().includes(sLower));
     return matchCat && matchSearch;
   });
 
@@ -711,7 +712,7 @@ export default function POSPage() {
         <div className="search-wrapper">
           <Search className="search-icon" />
           <input ref={searchRef} type="text" className="form-input"
-            placeholder="Cari produk..." value={search}
+            placeholder={PRICE_LABELS.searchPlaceholder || "Cari produk atau article..."} value={search}
             onChange={(e) => setSearch(e.target.value)} />
         </div>
 
@@ -774,6 +775,11 @@ export default function POSPage() {
                 >
                   <div className="product-emoji">{product.emoji}</div>
                   <div className="product-name">{product.name}</div>
+                  {product.barcode && (
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: -2, marginBottom: 4 }}>
+                      🏷️ {product.barcode}
+                    </div>
+                  )}
                   <div className="product-price" style={{ color: isResellerMode && hasResellerPrice ? 'var(--accent)' : undefined }}>
                     {formatRupiah(activePrice)}
                   </div>

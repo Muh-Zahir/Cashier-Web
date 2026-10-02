@@ -264,8 +264,8 @@ function ProductFormModal({ isOpen, onClose, editProduct, categories, onSaved })
         </div>
 
         <div className="form-group">
-          <label className="form-label">Barcode (Opsional)</label>
-          <input className="form-input" placeholder="Nomor barcode..." value={form.barcode}
+          <label className="form-label">{PRICE_LABELS.codeLabel || 'Article / Kode Barang (Opsional)'}</label>
+          <input className="form-input" placeholder={PRICE_LABELS.codePlaceholder || 'Nomor barcode / kode...'} value={form.barcode}
             onChange={(e) => setForm((f) => ({ ...f, barcode: e.target.value }))} />
         </div>
 
@@ -464,16 +464,16 @@ export default function ProductsPage() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         <div className="search-wrapper" style={{ flex: 1, minWidth: 200 }}>
           <Search className="search-icon" />
-          <input className="form-input" placeholder="Cari nama produk atau barcode..." value={search}
+          <input className="form-input" placeholder={PRICE_LABELS.searchPlaceholder || "Cari nama produk atau kode..."} value={search}
             onChange={(e) => setSearch(e.target.value)} />
         </div>
-        <select className="form-select" style={{ width: 150 }} value={statusFilter}
+        <select className="form-select" style={{ width: 160 }} value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}>
           <option value="all">Semua Status</option>
           <option value="active">Hanya Aktif</option>
           <option value="inactive">Hanya Nonaktif</option>
         </select>
-        <select className="form-select" style={{ width: 160 }} value={selectedCategory}
+        <select className="form-select" style={{ width: 175 }} value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}>
           <option value="all">Semua Kategori</option>
           {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -534,7 +534,11 @@ export default function ProductsPage() {
                           <span style={{ fontSize: 24 }}>{p.emoji}</span>
                           <div>
                             <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{p.name}</div>
-                            {p.barcode && <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{p.barcode}</div>}
+                            {p.barcode && (
+                              <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                                <span style={{ opacity: 0.7 }}>🏷️</span> {p.barcode}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -660,11 +664,18 @@ export default function ProductsPage() {
                     <span className="prod-card-emoji">{p.emoji}</span>
                     <div>
                       <div className="prod-card-name">{p.name}</div>
-                      {p.category_name && (
-                        <span className="badge badge-purple" style={{ fontSize: 9, padding: '1px 5px', marginTop: 2, display: 'inline-block' }}>
-                          {p.category_name}
-                        </span>
-                      )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
+                        {p.category_name && (
+                          <span className="badge badge-purple" style={{ fontSize: 9, padding: '1px 5px' }}>
+                            {p.category_name}
+                          </span>
+                        )}
+                        {p.barcode && (
+                          <span style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                            🏷️ {p.barcode}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
