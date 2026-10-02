@@ -22,11 +22,11 @@ function DashboardLayout({ children }) {
       <div className="app-layout">
         <Sidebar mobileOpen={mobileMenuOpen} setMobileOpen={setMobileMenuOpen} />
         <div className="main-content">
-          <MobileHeader onOpenMenu={() => setMobileMenuOpen(true)} />
+          <MobileHeader />
           <div className="main-content-inner">
             {children}
           </div>
-          <MobileBottomNav onOpenMenu={() => setMobileMenuOpen(true)} />
+          <MobileBottomNav />
         </div>
       </div>
     </ProtectedRoute>

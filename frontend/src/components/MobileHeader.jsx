@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, LogOut, User, Shield, X } from 'lucide-react';
+import { LogOut, User, Shield, X } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-export default function MobileHeader({ onOpenMenu }) {
+export default function MobileHeader() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
@@ -53,14 +53,6 @@ export default function MobileHeader({ onOpenMenu }) {
   return (
     <header className="mobile-header">
       <div className="mobile-header-left">
-        <button
-          type="button"
-          className="mobile-menu-btn"
-          onClick={onOpenMenu}
-          aria-label="Buka Menu"
-        >
-          <Menu size={20} />
-        </button>
         <div className="mobile-header-brand">
           <span className="mobile-header-logo">🛒</span>
           <span className="mobile-header-title">KasirPro</span>
