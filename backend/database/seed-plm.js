@@ -3,8 +3,8 @@
  * dan memasukkan data katalog elektronik Broco, Uticon, Eterna, Panasonic untuk PLM.
  */
 
-const rawUrl = 'https://kasir-db-muh-zahir.aws-ap-northeast-1.turso.io/v2/pipeline';
-const token = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODk1NDU5MzAsImlkIjoiMDFhMGE5M2YtMjUwMS03NWQyLWI3MWEtODg5YzJiMmViYTM3Iiwia2lkIjoiQVRyQkVNTEMzX2R2ajRjdXY1Qm5KRnkxdG5EaWk4SlA5QS1ENGFWNjhNayIsInJpZCI6IjJmOGUwODIwLTY5NmMtNGI2My1hMjFjLWZkYzQ1NDhiNjNjMCJ9.hAtq7Qr6_dF5-tiaQsSWCLmg0EWTcCpr9gLOwKecMW4SnV2YBQ9Q4hpzunmF29ih0Xjy-FopN0sM56ruNrdbCg';
+const rawUrl = 'https://kasir-db-plm-muh-zahir.aws-ap-northeast-1.turso.io/v2/pipeline';
+const token = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTA5MjM0NjgsImlkIjoiMDFhMGZiNWEtZDgwMS03ZTM1LWI3MTYtNjdmOTlhYTljMzkyIiwia2lkIjoiQVRyQkVNTEMzX2R2ajRjdXY1Qm5KRnkxdG5EaWk4SlA5QS1ENGFWNjhNayIsInJpZCI6IjkyMDlmZmY3LWIwZDUtNDUyMC05YzQ0LTI2MzkwYmFhZGI3MiJ9.SMqrsBsb9ySA8J4xFDZUQs1lyRO-1lt2CVXPxCmAelTM-GcQMlFQJLYy5-FmCWbNcCM5mIWH_RQsSrIEIQRnCw';
 
 function formatArgs(args) {
   return (args || []).map(a => {
