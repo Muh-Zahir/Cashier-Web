@@ -4,18 +4,21 @@ import { authApi } from '../api';
 const TOKEN_KEY = 'kasirpro_token';
 const USER_KEY = 'kasirpro_user';
 
+const savedToken = localStorage.getItem(TOKEN_KEY) || null;
+const savedUser = (() => {
+  try {
+    const saved = localStorage.getItem(USER_KEY);
+    return saved ? JSON.parse(saved) : null;
+  } catch {
+    return null;
+  }
+})();
+
 const useAuthStore = create((set, get) => ({
-  user: (() => {
-    try {
-      const saved = localStorage.getItem(USER_KEY);
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  })(),
-  token: localStorage.getItem(TOKEN_KEY) || null,
-  isAuthenticated: Boolean(localStorage.getItem(TOKEN_KEY)),
-  loading: true,
+  user: savedUser,
+  token: savedToken,
+  isAuthenticated: Boolean(savedToken && savedUser),
+  loading: Boolean(savedToken && !savedUser),
 
   // Login action
   login: async (username, password) => {

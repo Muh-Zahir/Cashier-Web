@@ -9,22 +9,23 @@ import {
 import toast from 'react-hot-toast';
 
 function SimpleBarChart({ data }) {
-  if (!data || data.length === 0) return (
+  if (!data || !Array.isArray(data) || data.length === 0) return (
     <div className="empty-state">
       <span className="empty-icon">📊</span>
       <p className="empty-title">Belum ada data</p>
     </div>
   );
 
-  const maxRevenue = Math.max(...data.map((d) => d.revenue), 1);
+  const maxRevenue = Math.max(...data.map((d) => Number(d.revenue) || 0), 1);
 
   return (
     <div style={{ padding: '16px 0' }}>
       <div className="simple-bar-chart">
         {data.map((item, idx) => {
-          const heightPct = (item.revenue / maxRevenue) * 100;
+          const rev = Number(item.revenue) || 0;
+          const heightPct = (rev / maxRevenue) * 100;
           return (
-            <div key={idx} className="bar-item" title={`${formatDateShort(item.date)}: Omset ${formatRupiah(item.revenue)} | Laba ${formatRupiah(item.profit || 0)}`}>
+            <div key={idx} className="bar-item" title={`${formatDateShort(item.date)}: Omset ${formatRupiah(rev)} | Laba ${formatRupiah(item.profit || 0)}`}>
               <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                 <div
                   className="bar-fill"
@@ -52,9 +53,10 @@ export default function DashboardPage() {
     try {
       setLoading(true);
       const res = await dashboardApi.getSummary();
-      setData(res.data);
+      setData(res?.data || res);
     } catch (err) {
       toast.error('Gagal memuat dashboard: ' + err.message);
+      setData(null);
     } finally {
       setLoading(false);
     }
@@ -62,24 +64,65 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="loading-spinner">
-        <div className="spinner"></div>
+      <div className="page-wrapper" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '55vh', gap: 14 }}>
+        <div className="spinner" style={{ width: 34, height: 34 }} />
+        <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500 }}>Memuat data dashboard...</span>
       </div>
     );
   }
 
-  const { today, month, products, topProducts, last7Days, recentTransactions } = data || {};
+  if (!data) {
+    return (
+      <div className="page-wrapper" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '55vh', gap: 16, textAlign: 'center' }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>
+          ⚠️
+        </div>
+        <div>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>Gagal Memuat Dashboard</h2>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', maxWidth: 420 }}>Tidak dapat mengambil ringkasan transaksi. Silakan periksa koneksi atau klik tombol muat ulang.</p>
+        </div>
+        <button className="btn btn-primary btn-sm" onClick={loadData} style={{ padding: '8px 20px', gap: 6 }}>
+          <ArrowUpRight size={14} /> Coba Muat Ulang
+        </button>
+      </div>
+    );
+  }
+
+  const today = data?.today || {};
+  const month = data?.month || data?.this_month || {};
+  const products = data?.products || {};
+  const rawTopProducts = data?.topProducts || data?.top_products || [];
+  const topProducts = Array.isArray(rawTopProducts) ? rawTopProducts.map((p) => ({
+    product_name: p.product_name || p.name || 'Produk',
+    total_sold: p.total_sold || p.sold || 0,
+    total_revenue: p.total_revenue || p.revenue || 0,
+    total_profit: p.total_profit || p.profit || 0,
+  })) : [];
+  const raw7Days = data?.last7Days || data?.last_7_days || [];
+  const last7Days = Array.isArray(raw7Days) ? raw7Days.map((d) => ({
+    date: d.date || d.label,
+    revenue: d.revenue || d.grand_total || 0,
+    profit: d.profit || 0,
+    transactions: d.transactions || d.count || 0,
+  })) : [];
+  const rawRecent = data?.recentTransactions || data?.recent_transactions || [];
+  const recentTransactions = Array.isArray(rawRecent) ? rawRecent : [];
 
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'admin';
 
-  const todayRevenue = today?.total_revenue || 0;
-  const todayProfit = today?.total_profit || 0;
+  const todayRevenue = today?.total_revenue ?? today?.revenue ?? 0;
+  const todayProfit = today?.total_profit ?? today?.profit ?? 0;
+  const todayCount = today?.transaction_count ?? today?.count ?? 0;
   const todayMargin = todayRevenue > 0 ? Math.round((todayProfit / todayRevenue) * 100) : 0;
 
-  const monthRevenue = month?.total_revenue || 0;
-  const monthProfit = month?.total_profit || 0;
+  const monthRevenue = month?.total_revenue ?? month?.revenue ?? 0;
+  const monthProfit = month?.total_profit ?? month?.profit ?? 0;
+  const monthCount = month?.transaction_count ?? month?.count ?? 0;
   const monthMargin = monthRevenue > 0 ? Math.round((monthProfit / monthRevenue) * 100) : 0;
+
+  const totalProducts = products?.total_products ?? products?.total ?? 0;
+  const lowStockCount = products?.low_stock_count ?? products?.low_stock ?? 0;
 
   return (
     <div className="page-wrapper">
@@ -99,7 +142,7 @@ export default function DashboardPage() {
           <div className="stat-icon green"><TrendingUp size={22} /></div>
           <div className="stat-label">Omset Hari Ini</div>
           <div className="stat-value">{formatRupiah(todayRevenue)}</div>
-          <div className="stat-sub">{today?.transaction_count || 0} transaksi</div>
+          <div className="stat-sub">{todayCount} transaksi</div>
         </div>
 
         {isAdmin && (
@@ -115,7 +158,7 @@ export default function DashboardPage() {
           <div className="stat-icon green"><ShoppingCart size={22} /></div>
           <div className="stat-label">Omset Bulan Ini</div>
           <div className="stat-value">{formatRupiah(monthRevenue)}</div>
-          <div className="stat-sub">{month?.transaction_count || 0} transaksi</div>
+          <div className="stat-sub">{monthCount} transaksi</div>
         </div>
 
         {isAdmin && (
@@ -163,8 +206,8 @@ export default function DashboardPage() {
           </div>
           <div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Stok Perlu Restock</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>{products?.low_stock_count || 0} Produk</div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Dari {products?.total_products || 0} produk aktif</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>{lowStockCount} Produk</div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Dari {totalProducts} produk aktif</div>
           </div>
         </div>
       </div>

@@ -519,15 +519,48 @@ export default async function handler(req, res) {
       `);
       const recentTrx = await query('SELECT * FROM transactions ORDER BY created_at DESC LIMIT 5');
 
+      const todayRow = today.rows[0] || { count: 0, revenue: 0, profit: 0 };
+      const monthRow = month.rows[0] || { count: 0, revenue: 0, profit: 0 };
+      const prodRow = prodStats.rows[0] || { total: 0, low_stock: 0, out_of_stock: 0 };
+      const topProdRows = (topProducts.rows || []).map(p => ({
+        ...p,
+        product_name: p.name || p.product_name,
+      }));
+      const last7Rows = last7Days.rows || [];
+      const recentRows = recentTrx.rows || [];
+
       return res.status(200).json({
         success: true,
         data: {
-          today: today.rows[0] || { count: 0, revenue: 0, profit: 0 },
-          this_month: month.rows[0] || { count: 0, revenue: 0, profit: 0 },
-          products: prodStats.rows[0] || { total: 0, low_stock: 0, out_of_stock: 0 },
-          top_products: topProducts.rows,
-          last_7_days: last7Days.rows,
-          recent_transactions: recentTrx.rows
+          today: {
+            ...todayRow,
+            transaction_count: todayRow.count,
+            total_revenue: todayRow.revenue,
+            total_profit: todayRow.profit,
+          },
+          month: {
+            ...monthRow,
+            transaction_count: monthRow.count,
+            total_revenue: monthRow.revenue,
+            total_profit: monthRow.profit,
+          },
+          this_month: {
+            ...monthRow,
+            transaction_count: monthRow.count,
+            total_revenue: monthRow.revenue,
+            total_profit: monthRow.profit,
+          },
+          products: {
+            ...prodRow,
+            total_products: prodRow.total,
+            low_stock_count: prodRow.low_stock,
+          },
+          topProducts: topProdRows,
+          top_products: topProdRows,
+          last7Days: last7Rows,
+          last_7_days: last7Rows,
+          recentTransactions: recentRows,
+          recent_transactions: recentRows
         }
       });
     }
