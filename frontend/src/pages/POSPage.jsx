@@ -10,6 +10,7 @@ import {
   Banknote, X, Check, Printer, Truck, TrendingUp, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { PRICE_LABELS } from '../config/clientConfig';
 
 // ====== RECEIPT ======
 function Receipt({ transaction, onClose }) {
@@ -30,7 +31,7 @@ function Receipt({ transaction, onClose }) {
         <div style={{ marginBottom: 8 }}>
           {[
             ['No. Invoice', transaction.invoice_number],
-            ['Tipe Harga', transaction.customer_type === 'reseller' ? '🏷️ Harga Supplier' : '👤 Harga Toko'],
+            ['Tipe Harga', transaction.customer_type === 'reseller' ? PRICE_LABELS.specialCustomer : PRICE_LABELS.regularCustomer],
             ['Kasir', transaction.cashier_name],
             ...(isDelivery ? [
               ['Ekspedisi', transaction.shipping_name],
@@ -462,7 +463,7 @@ function CartPanel({ onCheckout, mobileOpen = false, onCloseMobile }) {
           </div>
         </div>
 
-      {/* Customer Type Selector (Toko vs Supplier) */}
+      {/* Customer Type Selector */}
       <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)', background: 'var(--bg-secondary)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
           <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.4px', textTransform: 'uppercase' }}>
@@ -470,7 +471,7 @@ function CartPanel({ onCheckout, mobileOpen = false, onCloseMobile }) {
           </span>
           {customerType === 'reseller' && (
             <span className="badge badge-purple" style={{ fontSize: 10, padding: '2px 6px' }}>
-              Mode Supplier Aktif
+              {PRICE_LABELS.specialModeActive}
             </span>
           )}
         </div>
@@ -481,7 +482,7 @@ function CartPanel({ onCheckout, mobileOpen = false, onCloseMobile }) {
             style={{ fontSize: 12, padding: '6px 8px', justifyContent: 'center' }}
             onClick={() => setCustomerType('regular')}
           >
-            👤 Toko
+            {PRICE_LABELS.regularBadge}
           </button>
           <button
             type="button"
@@ -489,7 +490,7 @@ function CartPanel({ onCheckout, mobileOpen = false, onCloseMobile }) {
             style={{ fontSize: 12, padding: '6px 8px', justifyContent: 'center' }}
             onClick={() => setCustomerType('reseller')}
           >
-            🏷️ Supplier
+            {PRICE_LABELS.specialBadge}
           </button>
         </div>
       </div>
@@ -783,7 +784,7 @@ export default function POSPage() {
                       marginBottom: 6,
                       color: isResellerMode ? 'var(--text-muted)' : 'var(--text-secondary)',
                     }}>
-                      {isResellerMode ? `Toko: ${formatRupiah(product.price)}` : `Supplier: ${formatRupiah(product.reseller_price)}`}
+                      {isResellerMode ? PRICE_LABELS.priceCatalogRegular(formatRupiah(product.price)) : PRICE_LABELS.priceCatalogSpecial(formatRupiah(product.reseller_price))}
                     </div>
                   )}
                   <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center', marginTop: 2 }}>

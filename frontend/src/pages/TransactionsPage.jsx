@@ -5,6 +5,7 @@ import Modal from '../components/ui/Modal';
 import { Search, Eye, Trash2, Printer, Filter, Calendar, Truck, TrendingUp, Package } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import toast from 'react-hot-toast';
+import { PRICE_LABELS } from '../config/clientConfig';
 
 function TransactionDetail({ transaction, onClose, isAdmin }) {
   const handlePrint = () => window.print();
@@ -23,7 +24,7 @@ function TransactionDetail({ transaction, onClose, isAdmin }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
             {[
               ['No. Invoice', transaction.invoice_number],
-              ['Tipe Harga', transaction.customer_type === 'reseller' ? '🏷️ Harga Supplier' : '👤 Harga Toko'],
+              ['Tipe Harga', transaction.customer_type === 'reseller' ? PRICE_LABELS.specialCustomer : PRICE_LABELS.regularCustomer],
               ['Tanggal', formatDate(transaction.created_at)],
               ['Kasir', transaction.cashier_name],
               ['Metode Bayar', transaction.payment_method === 'cash' ? '💵 Tunai' : '💳 Transfer'],
@@ -283,7 +284,7 @@ export default function TransactionsPage() {
                         </span>
                         {t.customer_type === 'reseller' && (
                           <span className="badge badge-purple" style={{ fontSize: 10, padding: '1px 5px' }}>
-                            Supplier
+                            {PRICE_LABELS.specialShort}
                           </span>
                         )}
                       </div>
@@ -355,7 +356,7 @@ export default function TransactionsPage() {
                 <div className="txn-card-invoice">
                   <span>{t.invoice_number}</span>
                   {t.customer_type === 'reseller' && (
-                    <span className="badge badge-purple" style={{ fontSize: 9, padding: '1px 5px' }}>Supplier</span>
+                    <span className="badge badge-purple" style={{ fontSize: 9, padding: '1px 5px' }}>{PRICE_LABELS.specialShort}</span>
                   )}
                 </div>
                 <div style={{ display: 'flex', gap: 5 }}>

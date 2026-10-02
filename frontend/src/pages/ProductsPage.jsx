@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import toast from 'react-hot-toast';
+import { PRICE_LABELS } from '../config/clientConfig';
 
 const EMOJIS = ['🍳','🍜','🍗','🍕','🍔','🌮','🥗','🍱','🥘','🍰','🧁','🍩','🍦','🥤','🧋','☕','🍊','🍓','🥪','🌭','🍟','🧃','🥛','🍺','🧊','📦','🛒','🎁','💊','🧴','🧼','🪥','📚','🎮','🎧','📱','💻','⌚','🔑','🧲','🔋','💡','🪴','🧺','🛋️','🪑','🧹','🪣','🔧'];
 
@@ -71,7 +72,7 @@ function ProductFormModal({ isOpen, onClose, editProduct, categories, onSaved })
   async function handleSubmit(e) {
     e.preventDefault();
     if (!form.name || !form.price) {
-      toast.error('Nama dan harga toko wajib diisi');
+      toast.error(PRICE_LABELS.regularToastRequired);
       return;
     }
     setLoading(true);
@@ -160,23 +161,23 @@ function ProductFormModal({ isOpen, onClose, editProduct, categories, onSaved })
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} required />
         </div>
 
-        {/* Pricing Grid: Harga Toko vs Supplier vs Modal */}
+        {/* Pricing Grid: Regular vs Special vs Modal */}
         <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
           <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Tag size={15} /> Pengaturan Harga Toko & Supplier
+            <Tag size={15} /> {PRICE_LABELS.pricingSectionTitle}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div className="form-group">
-              <label className="form-label">Harga Toko *</label>
+              <label className="form-label">{PRICE_LABELS.regularFormLabel}</label>
               <input type="number" className="form-input" placeholder="0" value={form.price}
                 onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))} required min={0} />
-              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Harga standar / toko</span>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{PRICE_LABELS.regularFormHint}</span>
             </div>
             <div className="form-group">
-              <label className="form-label">Harga Supplier</label>
+              <label className="form-label">{PRICE_LABELS.specialFormLabel}</label>
               <input type="number" className="form-input" placeholder="0" value={form.reseller_price}
                 onChange={(e) => setForm((f) => ({ ...f, reseller_price: e.target.value }))} min={0} />
-              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Kosongkan / 0 jika sama</span>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{PRICE_LABELS.specialFormHint}</span>
             </div>
           </div>
 
@@ -199,14 +200,14 @@ function ProductFormModal({ isOpen, onClose, editProduct, categories, onSaved })
               fontSize: 12,
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>Laba Harga Toko:</span>
+                <span style={{ color: 'var(--text-secondary)' }}>{PRICE_LABELS.regularProfitLabel}</span>
                 <span style={{ fontWeight: 700, color: normalProfit >= 0 ? 'var(--text-primary)' : '#ff5555' }}>
                   +{formatRupiah(normalProfit)} <span style={{ color: 'var(--text-muted)' }}>({normalMargin}%)</span>
                 </span>
               </div>
               {resellerNum > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Laba Supplier:</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>{PRICE_LABELS.specialProfitLabel}</span>
                   <span style={{ fontWeight: 700, color: resellerProfit >= 0 ? 'var(--text-primary)' : '#ff5555' }}>
                     +{formatRupiah(resellerProfit)} <span style={{ color: 'var(--text-muted)' }}>({resellerMargin}%)</span>
                   </span>
@@ -508,8 +509,8 @@ export default function ProductsPage() {
                 <tr>
                   <th>Produk</th>
                   <th>Kategori</th>
-                  <th style={{ textAlign: 'right' }}>Harga Toko</th>
-                  <th style={{ textAlign: 'right' }}>Harga Supplier</th>
+                  <th style={{ textAlign: 'right' }}>{PRICE_LABELS.regularName}</th>
+                  <th style={{ textAlign: 'right' }}>{PRICE_LABELS.specialName}</th>
                   {isAdmin && <th style={{ textAlign: 'right' }}>Harga Modal</th>}
                   {isAdmin && <th style={{ textAlign: 'right' }}>Estimasi Laba</th>}
                   <th style={{ textAlign: 'center' }}>Stok</th>
@@ -699,7 +700,7 @@ export default function ProductsPage() {
                   <div>
                     <div className="prod-card-price">{formatRupiah(p.price)}</div>
                     {hasResellerPrice && (
-                      <div className="prod-card-reseller">Supplier: {formatRupiah(p.reseller_price)}</div>
+                      <div className="prod-card-reseller">{PRICE_LABELS.specialShort}: {formatRupiah(p.reseller_price)}</div>
                     )}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
