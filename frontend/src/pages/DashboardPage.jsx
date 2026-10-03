@@ -44,6 +44,8 @@ function SimpleBarChart({ data }) {
 export default function DashboardPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     loadData();
@@ -107,9 +109,6 @@ export default function DashboardPage() {
   })) : [];
   const rawRecent = data?.recentTransactions || data?.recent_transactions || [];
   const recentTransactions = Array.isArray(rawRecent) ? rawRecent : [];
-
-  const { user } = useAuthStore();
-  const isAdmin = user?.role === 'admin';
 
   const todayRevenue = today?.total_revenue ?? today?.revenue ?? 0;
   const todayProfit = today?.total_profit ?? today?.profit ?? 0;
