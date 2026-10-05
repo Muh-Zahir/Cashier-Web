@@ -1,11 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LogOut, User, Shield, X } from 'lucide-react';
+import { LogOut, User, Shield, X, Sun, Moon } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import { useThemeStore } from '../store/useThemeStore';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 export default function MobileHeader() {
   const { user, logout } = useAuthStore();
+  const { theme, toggleTheme } = useThemeStore();
+  const isLight = theme === 'light';
   const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -58,6 +61,30 @@ export default function MobileHeader() {
           <span className="mobile-header-title">KasirPro</span>
         </div>
       </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Theme Toggle */}
+        <button
+          type="button"
+          onClick={toggleTheme}
+          title={isLight ? 'Mode Gelap' : 'Mode Terang'}
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border)',
+            background: 'var(--bg-subtle)',
+            color: 'var(--text-secondary)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'var(--transition)',
+            flexShrink: 0,
+          }}
+        >
+          {isLight ? <Moon size={16} /> : <Sun size={16} />}
+        </button>
 
       {user && (
         <div style={{ position: 'relative' }} ref={popupRef}>
@@ -127,6 +154,7 @@ export default function MobileHeader() {
           )}
         </div>
       )}
+      </div>
     </header>
   );
 }

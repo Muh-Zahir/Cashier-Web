@@ -12,6 +12,7 @@ import POSPage from './pages/POSPage';
 import ProductsPage from './pages/ProductsPage';
 import TransactionsPage from './pages/TransactionsPage';
 import { useAuthStore } from './store/useAuthStore';
+import { useThemeStore } from './store/useThemeStore';
 import './index.css';
 
 function DashboardLayout({ children }) {
@@ -35,10 +36,13 @@ function DashboardLayout({ children }) {
 
 export default function App() {
   const checkAuth = useAuthStore((s) => s.checkAuth);
+  const { initTheme, theme } = useThemeStore();
+  const isLight = theme === 'light';
 
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+    initTheme();
+  }, [checkAuth, initTheme]);
 
   return (
     <BrowserRouter>
@@ -94,7 +98,15 @@ export default function App() {
       <Toaster
         position="top-right"
         toastOptions={{
-          style: {
+          style: isLight ? {
+            background: '#ffffff',
+            color: '#111111',
+            border: '1px solid rgba(0,0,0,0.1)',
+            borderRadius: '12px',
+            fontSize: '13.5px',
+            fontFamily: 'Inter, sans-serif',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+          } : {
             background: '#161616',
             color: '#f4f4f5',
             border: '1px solid rgba(255,255,255,0.12)',
@@ -104,10 +116,14 @@ export default function App() {
             boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
           },
           success: {
-            iconTheme: { primary: '#fff', secondary: '#000' },
+            iconTheme: isLight
+              ? { primary: '#16a34a', secondary: '#ffffff' }
+              : { primary: '#fff', secondary: '#000' },
           },
           error: {
-            iconTheme: { primary: '#f0a3a3', secondary: '#161616' },
+            iconTheme: isLight
+              ? { primary: '#dc2626', secondary: '#ffffff' }
+              : { primary: '#f0a3a3', secondary: '#161616' },
           },
         }}
       />

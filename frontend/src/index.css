@@ -84,6 +84,83 @@
 }
 
 /* ===========================
+   LIGHT THEME OVERRIDES
+=========================== */
+[data-theme="light"] {
+  /* Backgrounds */
+  --bg-root:    #f0f2f5;
+  --bg-primary: #ffffff;
+  --bg-card:    #ffffff;
+  --bg-hover:   #f5f5f5;
+  --bg-input:   #f7f8fa;
+  --bg-subtle:  rgba(0,0,0,0.03);
+  --bg-subtle-hover: rgba(0,0,0,0.06);
+
+  /* Text */
+  --text-primary:   #111111;
+  --text-secondary: #555555;
+  --text-muted:     #888888;
+  --text-disabled:  #bbbbbb;
+
+  /* Borders */
+  --border:         rgba(0,0,0,0.09);
+  --border-hover:   rgba(0,0,0,0.16);
+  --border-focus:   rgba(0,0,0,0.45);
+  --border-strong:  rgba(0,0,0,0.2);
+
+  /* Accent */
+  --accent:         #111111;
+  --accent-dim:     rgba(0,0,0,0.08);
+  --accent-dimmer:  rgba(0,0,0,0.04);
+
+  /* Status */
+  --success:        #16a34a;
+  --success-bg:     rgba(22,163,74,0.08);
+  --warning:        #ca8a04;
+  --warning-bg:     rgba(202,138,4,0.08);
+  --danger:         #dc2626;
+  --danger-bg:      rgba(220,38,38,0.08);
+  --info:           #2563eb;
+  --info-bg:        rgba(37,99,235,0.08);
+
+  /* Shadows */
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md:  0 4px 16px rgba(0,0,0,0.10);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,0.12);
+  --shadow-xl:  0 16px 64px rgba(0,0,0,0.14);
+  --shadow-glow: 0 0 0 1px rgba(0,0,0,0.08), 0 4px 20px rgba(0,0,0,0.08);
+
+  /* Gray overrides for light mode usage */
+  --gray-50:  #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-150: #efefef;
+  --gray-200: #e5e5e5;
+  --gray-300: #d4d4d4;
+  --gray-400: #a3a3a3;
+  --gray-500: #737373;
+  --gray-600: #525252;
+  --gray-700: #888888;
+  --gray-800: #f0f0f0;
+  --gray-850: #ffffff;
+  --gray-900: #ffffff;
+  --gray-950: #f0f2f5;
+}
+
+/* Light mode specific tweaks */
+[data-theme="light"] body {
+  background-color: var(--bg-root);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: #cccccc;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: #aaaaaa;
+}
+
+/* ===========================
    RESET & BASE
 =========================== */
 *, *::before, *::after {

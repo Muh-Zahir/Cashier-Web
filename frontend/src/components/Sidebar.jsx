@@ -8,8 +8,11 @@ import {
   LogOut,
   User as UserIcon,
   X,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import { useThemeStore } from '../store/useThemeStore';
 import Modal from './ui/Modal';
 import toast from 'react-hot-toast';
 
@@ -54,6 +57,8 @@ function Clock() {
 export default function Sidebar({ mobileOpen = false, setMobileOpen }) {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
+  const { theme, toggleTheme } = useThemeStore();
+  const isLight = theme === 'light';
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -127,6 +132,67 @@ export default function Sidebar({ mobileOpen = false, setMobileOpen }) {
         </nav>
 
         <div className="sidebar-footer">
+          {/* Theme Toggle */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            title={isLight ? 'Ganti ke Mode Gelap' : 'Ganti ke Mode Terang'}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              width: '100%',
+              padding: '9px 12px',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border)',
+              background: 'var(--bg-subtle)',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              fontSize: 13,
+              fontFamily: 'Inter, sans-serif',
+              fontWeight: 500,
+              transition: 'var(--transition)',
+              marginBottom: 10,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--bg-subtle-hover)';
+              e.currentTarget.style.color = 'var(--text-primary)';
+              e.currentTarget.style.borderColor = 'var(--border-hover)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--bg-subtle)';
+              e.currentTarget.style.color = 'var(--text-secondary)';
+              e.currentTarget.style.borderColor = 'var(--border)';
+            }}
+          >
+            {isLight
+              ? <Moon size={15} style={{ flexShrink: 0 }} />
+              : <Sun size={15} style={{ flexShrink: 0 }} />
+            }
+            <span>{isLight ? 'Mode Gelap' : 'Mode Terang'}</span>
+            <span style={{
+              marginLeft: 'auto',
+              width: 34,
+              height: 18,
+              borderRadius: 9,
+              background: isLight ? 'var(--border-strong)' : 'rgba(255,255,255,0.18)',
+              position: 'relative',
+              flexShrink: 0,
+              transition: 'background 0.2s',
+            }}>
+              <span style={{
+                position: 'absolute',
+                top: 2,
+                left: isLight ? 18 : 2,
+                width: 14,
+                height: 14,
+                borderRadius: '50%',
+                background: 'var(--text-primary)',
+                transition: 'left 0.2s',
+              }} />
+            </span>
+          </button>
+
           <Clock />
 
           {user && (
