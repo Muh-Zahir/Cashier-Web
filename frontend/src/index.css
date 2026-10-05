@@ -88,77 +88,402 @@
 =========================== */
 [data-theme="light"] {
   /* Backgrounds */
-  --bg-root:    #f0f2f5;
-  --bg-primary: #ffffff;
+  --bg-root:    #eef0f4;
+  --bg-primary: #f9fafb;
   --bg-card:    #ffffff;
-  --bg-hover:   #f5f5f5;
-  --bg-input:   #f7f8fa;
-  --bg-subtle:  rgba(0,0,0,0.03);
-  --bg-subtle-hover: rgba(0,0,0,0.06);
+  --bg-hover:   #f0f1f4;
+  --bg-input:   #f5f6f9;
+  --bg-subtle:  rgba(0,0,0,0.035);
+  --bg-subtle-hover: rgba(0,0,0,0.065);
 
   /* Text */
-  --text-primary:   #111111;
-  --text-secondary: #555555;
-  --text-muted:     #888888;
-  --text-disabled:  #bbbbbb;
+  --text-primary:   #0f1117;
+  --text-secondary: #4a5265;
+  --text-muted:     #8a92a6;
+  --text-disabled:  #bcc0cc;
 
   /* Borders */
-  --border:         rgba(0,0,0,0.09);
+  --border:         rgba(0,0,0,0.08);
   --border-hover:   rgba(0,0,0,0.16);
-  --border-focus:   rgba(0,0,0,0.45);
-  --border-strong:  rgba(0,0,0,0.2);
+  --border-focus:   rgba(0,0,0,0.40);
+  --border-strong:  rgba(0,0,0,0.14);
 
   /* Accent */
-  --accent:         #111111;
-  --accent-dim:     rgba(0,0,0,0.08);
-  --accent-dimmer:  rgba(0,0,0,0.04);
+  --accent:         #0f1117;
+  --accent-dim:     rgba(15,17,23,0.08);
+  --accent-dimmer:  rgba(15,17,23,0.04);
 
-  /* Status */
+  /* Status — more vivid on light bg */
   --success:        #16a34a;
-  --success-bg:     rgba(22,163,74,0.08);
-  --warning:        #ca8a04;
-  --warning-bg:     rgba(202,138,4,0.08);
+  --success-bg:     rgba(22,163,74,0.09);
+  --warning:        #b45309;
+  --warning-bg:     rgba(180,83,9,0.09);
   --danger:         #dc2626;
   --danger-bg:      rgba(220,38,38,0.08);
   --info:           #2563eb;
   --info-bg:        rgba(37,99,235,0.08);
 
-  /* Shadows */
-  --shadow-sm:  0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md:  0 4px 16px rgba(0,0,0,0.10);
-  --shadow-lg:  0 8px 32px rgba(0,0,0,0.12);
-  --shadow-xl:  0 16px 64px rgba(0,0,0,0.14);
-  --shadow-glow: 0 0 0 1px rgba(0,0,0,0.08), 0 4px 20px rgba(0,0,0,0.08);
+  /* Shadows — soft & layered */
+  --shadow-sm:  0 1px 2px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-md:  0 2px 8px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
+  --shadow-lg:  0 4px 16px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.06);
+  --shadow-xl:  0 8px 32px rgba(0,0,0,0.10), 0 16px 48px rgba(0,0,0,0.07);
+  --shadow-glow: 0 0 0 1px rgba(0,0,0,0.07), 0 4px 20px rgba(0,0,0,0.07);
 
-  /* Gray overrides for light mode usage */
+  /* Gray scale remapped for light */
   --gray-50:  #fafafa;
-  --gray-100: #f5f5f5;
-  --gray-150: #efefef;
-  --gray-200: #e5e5e5;
-  --gray-300: #d4d4d4;
-  --gray-400: #a3a3a3;
-  --gray-500: #737373;
-  --gray-600: #525252;
-  --gray-700: #888888;
-  --gray-800: #f0f0f0;
+  --gray-100: #f4f5f7;
+  --gray-150: #eef0f4;
+  --gray-200: #e4e7ed;
+  --gray-300: #d1d5de;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #f0f1f5;
   --gray-850: #ffffff;
   --gray-900: #ffffff;
-  --gray-950: #f0f2f5;
+  --gray-950: #eef0f4;
+
+  /* Override white/black roles for theme-aware usage */
+  --white: #ffffff;
+  --black: #0f1117;
 }
 
-/* Light mode specific tweaks */
-[data-theme="light"] body {
-  background-color: var(--bg-root);
+/* ======== LIGHT: Component-level overrides ======== */
+
+/* Sidebar — white panel with soft border */
+[data-theme="light"] .sidebar {
+  background: #ffffff;
+  border-right: 1px solid var(--border);
+  box-shadow: 2px 0 12px rgba(0,0,0,0.05);
+}
+
+/* Logo text */
+[data-theme="light"] .logo-title {
+  color: #0f1117;
+}
+
+/* Active nav item */
+[data-theme="light"] .nav-item.active {
+  background: #0f1117;
+  color: #ffffff;
+}
+
+[data-theme="light"] .nav-item:hover {
+  background: var(--bg-hover);
   color: var(--text-primary);
 }
 
+/* Sidebar clock */
+[data-theme="light"] .sidebar-time .time {
+  color: #0f1117;
+}
+
+/* Sidebar user avatar */
+[data-theme="light"] .sidebar-user-avatar {
+  background: #e4e7ed;
+  border: 1px solid var(--border);
+  color: #0f1117;
+}
+
+[data-theme="light"] .sidebar-user-name {
+  color: #0f1117;
+}
+
+[data-theme="light"] .sidebar-user-role.admin {
+  background: rgba(15,17,23,0.08);
+  color: #374151;
+}
+
+[data-theme="light"] .sidebar-user-role.cashier {
+  background: rgba(15,17,23,0.05);
+  color: #6b7280;
+}
+
+[data-theme="light"] .sidebar-logout-btn:hover {
+  background: #fff0f0;
+  color: #dc2626;
+  border-color: rgba(220,38,38,0.2);
+}
+
+[data-theme="light"] .sidebar-close-btn:hover {
+  color: #0f1117;
+  background: var(--bg-hover);
+}
+
+/* ======== LIGHT: Mobile Header ======== */
+[data-theme="light"] .mobile-header {
+  background: rgba(255,255,255,0.95);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .mobile-header-brand {
+  color: #0f1117;
+}
+
+[data-theme="light"] .mobile-user-avatar {
+  background: #e4e7ed;
+  border: 2px solid var(--border-strong);
+  color: #0f1117;
+}
+
+[data-theme="light"] .mobile-avatar-btn:active .mobile-user-avatar {
+  border-color: #0f1117;
+}
+
+/* ======== LIGHT: Profile Popup ======== */
+[data-theme="light"] .mobile-profile-popup {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-xl);
+}
+
+[data-theme="light"] .mpp-header {
+  background: #f9fafb;
+  border-bottom: 1px solid var(--border);
+}
+
+[data-theme="light"] .mpp-avatar {
+  background: #e4e7ed;
+  border: 2px solid var(--border-strong);
+  color: #0f1117;
+}
+
+[data-theme="light"] .mpp-name {
+  color: #0f1117;
+}
+
+[data-theme="light"] .mpp-role-badge {
+  background: rgba(0,0,0,0.05);
+  color: #4a5265;
+  border: 1px solid var(--border);
+}
+
+[data-theme="light"] .mpp-role-badge[data-role="admin"] {
+  background: rgba(37,99,235,0.08);
+  color: #2563eb;
+  border-color: rgba(37,99,235,0.2);
+}
+
+[data-theme="light"] .mpp-close {
+  background: var(--bg-hover);
+  color: var(--text-muted);
+}
+
+[data-theme="light"] .mpp-close:hover {
+  color: #0f1117;
+  background: #e4e7ed;
+}
+
+[data-theme="light"] .mpp-logout-btn {
+  background: rgba(220,38,38,0.06);
+  border: 1px solid rgba(220,38,38,0.18);
+  color: #dc2626;
+}
+
+[data-theme="light"] .mpp-logout-btn:hover {
+  background: rgba(220,38,38,0.12);
+  border-color: rgba(220,38,38,0.32);
+}
+
+/* ======== LIGHT: Bottom Navigation ======== */
+[data-theme="light"] .mobile-bottom-nav {
+  background: rgba(255,255,255,0.97);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -2px 16px rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .bottom-nav-item {
+  color: #8a92a6;
+}
+
+[data-theme="light"] .bottom-nav-item:hover,
+[data-theme="light"] .bottom-nav-item.active {
+  color: #0f1117;
+}
+
+[data-theme="light"] .bottom-nav-badge {
+  background: #0f1117;
+  color: #ffffff;
+}
+
+/* ======== LIGHT: Cards & Panels ======== */
+[data-theme="light"] .card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="light"] .card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-hover);
+}
+
+/* ======== LIGHT: Product Cards ======== */
+[data-theme="light"] .product-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="light"] .product-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+}
+
+/* ======== LIGHT: Floating Cart Bar ======== */
+[data-theme="light"] .pos-mobile-cart-bar {
+  background: rgba(255,255,255,0.97);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+[data-theme="light"] .pos-mobile-cart-badge {
+  background: #eef0f4;
+  color: #0f1117;
+}
+
+[data-theme="light"] .pos-mobile-cart-count {
+  background: #0f1117;
+  color: #ffffff;
+}
+
+/* ======== LIGHT: Stat Cards ======== */
+[data-theme="light"] .stat-card {
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ======== LIGHT: Tables ======== */
+[data-theme="light"] table thead tr {
+  background: #f4f5f7;
+}
+
+[data-theme="light"] table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* ======== LIGHT: Inputs & Buttons ======== */
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] textarea {
+  background: #ffffff;
+  border-color: var(--border);
+  color: #0f1117;
+}
+
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: #9ca3af;
+}
+
+[data-theme="light"] input:focus,
+[data-theme="light"] select:focus {
+  border-color: #0f1117;
+  box-shadow: 0 0 0 3px rgba(15,17,23,0.07);
+}
+
+/* ======== LIGHT: Buttons ======== */
+[data-theme="light"] .btn-primary {
+  background: #0f1117;
+  color: #ffffff;
+  border-color: #0f1117;
+}
+
+[data-theme="light"] .btn-primary:hover {
+  background: #1e2230;
+}
+
+[data-theme="light"] .btn-secondary {
+  background: #f0f1f5;
+  color: #0f1117;
+  border: 1px solid var(--border);
+}
+
+[data-theme="light"] .btn-secondary:hover {
+  background: #e4e7ed;
+}
+
+/* ======== LIGHT: Modal ======== */
+[data-theme="light"] .modal {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-xl);
+}
+
+[data-theme="light"] .modal-overlay {
+  background: rgba(15,17,23,0.45);
+}
+
+/* ======== LIGHT: Badges ======== */
+[data-theme="light"] .badge-success,
+[data-theme="light"] .badge.badge-success {
+  background: rgba(22,163,74,0.1);
+  color: #15803d;
+  border-color: rgba(22,163,74,0.2);
+}
+
+[data-theme="light"] .badge-warning,
+[data-theme="light"] .badge.badge-warning {
+  background: rgba(180,83,9,0.08);
+  color: #92400e;
+  border-color: rgba(180,83,9,0.18);
+}
+
+[data-theme="light"] .badge-danger,
+[data-theme="light"] .badge.badge-danger {
+  background: rgba(220,38,38,0.08);
+  color: #b91c1c;
+  border-color: rgba(220,38,38,0.18);
+}
+
+[data-theme="light"] .badge-purple,
+[data-theme="light"] .badge.badge-purple {
+  background: rgba(124,58,237,0.08);
+  color: #6d28d9;
+  border-color: rgba(124,58,237,0.18);
+}
+
+/* ======== LIGHT: Scrollbar ======== */
 [data-theme="light"] ::-webkit-scrollbar-thumb {
-  background: #cccccc;
+  background: #d1d5de;
 }
 
 [data-theme="light"] ::-webkit-scrollbar-thumb:hover {
-  background: #aaaaaa;
+  background: #9ca3af;
 }
+
+/* ======== LIGHT: Filter tabs / Brand pills ======== */
+[data-theme="light"] .filter-tab,
+[data-theme="light"] .brand-tab {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+[data-theme="light"] .filter-tab.active,
+[data-theme="light"] .brand-tab.active,
+[data-theme="light"] .filter-tab:hover,
+[data-theme="light"] .brand-tab:hover {
+  background: #0f1117;
+  color: #ffffff;
+  border-color: #0f1117;
+}
+
+/* ======== LIGHT: Cart Panel ======== */
+[data-theme="light"] .cart-panel {
+  background: #ffffff;
+  border-left: 1px solid var(--border);
+  box-shadow: var(--shadow-xl);
+}
+
+/* ======== LIGHT: Sidebar backdrop ======== */
+[data-theme="light"] .sidebar-backdrop {
+  background: rgba(15,17,23,0.45);
+}
+
 
 /* ===========================
    RESET & BASE
