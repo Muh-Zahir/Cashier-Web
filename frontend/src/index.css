@@ -463,13 +463,53 @@
   color: var(--text-secondary);
 }
 
-[data-theme="light"] .filter-tab.active,
-[data-theme="light"] .brand-tab.active,
 [data-theme="light"] .filter-tab:hover,
 [data-theme="light"] .brand-tab:hover {
+  background: #f1f5f9;
+  color: #0f1117;
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .filter-tab.active,
+[data-theme="light"] .brand-tab.active {
   background: #0f1117;
   color: #ffffff;
   border-color: #0f1117;
+}
+
+[data-theme="light"] .brand-tab-count {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+[data-theme="light"] .brand-tab:hover .brand-tab-count {
+  background: #e2e8f0;
+  color: #0f1117;
+}
+
+[data-theme="light"] .brand-tab.active .brand-tab-count {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff !important;
+}
+
+/* ======== LIGHT: Sub-category pills ======== */
+[data-theme="light"] .sub-category-pill {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+[data-theme="light"] .sub-category-pill:hover {
+  background: #f1f5f9;
+  color: #0f1117;
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .sub-category-pill.active {
+  background: #0f1117;
+  color: #ffffff;
+  border-color: #0f1117;
+  font-weight: 700;
 }
 
 /* ======== LIGHT: Cart Panel ======== */
