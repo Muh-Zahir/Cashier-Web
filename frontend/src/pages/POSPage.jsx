@@ -679,7 +679,7 @@ export default function POSPage() {
   const [receipt, setReceipt]     = useState(null);
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
 
-  const { addItem, items, getTotal, shippingEnabled, shippingName, shippingCost, recipientName, recipientAddress } = useCartStore();
+  const { addItem, updateQuantity, items, getTotal, shippingEnabled, shippingName, shippingCost, recipientName, recipientAddress } = useCartStore();
   const searchRef = useRef(null);
 
   useEffect(() => {
@@ -864,7 +864,7 @@ export default function POSPage() {
             <p className="empty-text">Coba kata kunci yang berbeda</p>
           </div>
         ) : (
-          <div className="product-grid">
+          <div className="pos-product-list">
             {filteredProducts.map((product) => {
               const isOut = product.stock <= 0;
               const isLow = product.stock > 0 && product.stock <= 10;
@@ -876,64 +876,108 @@ export default function POSPage() {
               const inCartQty = inCartItem ? inCartItem.quantity : 0;
               const isCartFull = product.stock > 0 && inCartQty >= product.stock;
 
+              function handleAdd() {
+                if (isOut) {
+                  toast.error(`Produk "${product.name}" sudah habis!`, { id: `stock-${product.id}` });
+                  return;
+                }
+                if (isCartFull) {
+                  toast.error(`Semua stok "${product.name}" (${product.stock}) sudah ada di keranjang!`, { id: `stock-${product.id}` });
+                  return;
+                }
+                const res = addItem({ ...product, id: product.id });
+                if (res && !res.success) {
+                  if (res.reason === 'max_stock_reached') {
+                    toast.error(`Stok "${product.name}" hanya tersedia ${product.stock}!`, { id: `stock-${product.id}` });
+                  } else if (res.reason === 'out_of_stock') {
+                    toast.error(`Produk "${product.name}" sudah habis!`, { id: `stock-${product.id}` });
+                  }
+                }
+              }
+
               return (
                 <div
                   key={product.id}
-                  className={`product-card${isOut ? ' out-of-stock' : ''}${isCartFull ? ' cart-full' : ''}`}
-                  onClick={() => {
-                    if (isOut) {
-                      toast.error(`Produk "${product.name}" sudah habis!`, { id: `stock-${product.id}` });
-                      return;
-                    }
-                    if (isCartFull) {
-                      toast.error(`Semua stok "${product.name}" (${product.stock}) sudah ada di keranjang!`, { id: `stock-${product.id}` });
-                      return;
-                    }
-                    const res = addItem({ ...product, id: product.id });
-                    if (res && !res.success) {
-                      if (res.reason === 'max_stock_reached') {
-                        toast.error(`Stok "${product.name}" hanya tersedia ${product.stock}!`, { id: `stock-${product.id}` });
-                      } else if (res.reason === 'out_of_stock') {
-                        toast.error(`Produk "${product.name}" sudah habis!`, { id: `stock-${product.id}` });
-                      }
-                    }
-                  }}
-                  style={isCartFull ? { borderColor: 'rgba(99, 102, 241, 0.4)' } : undefined}
+                  className={`pos-list-row${isOut ? ' out-of-stock' : ''}${isCartFull ? ' cart-full' : ''}`}
                 >
-                  <div className="product-emoji">{product.emoji}</div>
-                  <div className="product-name">{product.name}</div>
-                  {product.barcode && (
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: -2, marginBottom: 4 }}>
-                      🏷️ {product.barcode}
+                  {/* Left: emoji + info */}
+                  <div className="pos-list-identity" onClick={!isOut && !isCartFull ? handleAdd : undefined}>
+                    <span className="pos-list-emoji">{product.emoji}</span>
+                    <div className="pos-list-info">
+                      <div className="pos-list-name">{product.name}</div>
+                      <div className="pos-list-meta">
+                        {product.barcode && (
+                          <span style={{ fontFamily: 'monospace', fontSize: 10, color: 'var(--text-muted)' }}>
+                            🏷️ {product.barcode}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  )}
-                  <div className="product-price" style={{ color: isResellerMode && hasResellerPrice ? 'var(--accent)' : undefined }}>
-                    {formatRupiah(activePrice)}
                   </div>
-                  {hasResellerPrice && (
-                    <div style={{
-                      fontSize: 10,
-                      marginTop: -4,
-                      marginBottom: 6,
-                      color: isResellerMode ? 'var(--text-muted)' : 'var(--text-secondary)',
-                    }}>
-                      {isResellerMode ? PRICE_LABELS.priceCatalogRegular(formatRupiah(product.price)) : PRICE_LABELS.priceCatalogSpecial(formatRupiah(product.reseller_price))}
+
+                  {/* Center: price + stock */}
+                  <div className="pos-list-center" onClick={!isOut && !isCartFull ? handleAdd : undefined}>
+                    <div className="pos-list-price" style={{ color: isResellerMode && hasResellerPrice ? 'var(--accent)' : undefined }}>
+                      {formatRupiah(activePrice)}
                     </div>
-                  )}
-                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center', marginTop: 2 }}>
-                    <span className={`product-stock-badge ${isOut ? 'out' : isLow ? 'low-stock' : 'in-stock'}`}>
+                    {hasResellerPrice && (
+                      <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>
+                        {isResellerMode
+                          ? PRICE_LABELS.priceCatalogRegular(formatRupiah(product.price))
+                          : PRICE_LABELS.priceCatalogSpecial(formatRupiah(product.reseller_price))}
+                      </div>
+                    )}
+                    <span className={`product-stock-badge ${isOut ? 'out' : isLow ? 'low-stock' : 'in-stock'}`} style={{ marginTop: 3, display: 'inline-block' }}>
                       {isOut ? 'Habis' : isLow ? `Sisa ${product.stock}` : `Stok ${product.stock}`}
                     </span>
-                    {inCartQty > 0 && (
-                      <span className="badge badge-purple" style={{ fontSize: 10, padding: '2px 6px', fontWeight: 600 }}>
-                        🛒 {inCartQty}{isCartFull ? ' (Maks)' : ''}
-                      </span>
+                  </div>
+
+                  {/* Right: add button or qty stepper */}
+                  <div className="pos-list-action">
+                    {inCartQty > 0 ? (
+                      <div className="pos-list-stepper">
+                        <button
+                          type="button"
+                          className="pos-stepper-btn"
+                          onClick={() => updateQuantity(product.id, inCartQty - 1)}
+                          title="Kurangi"
+                        >
+                          <Minus size={12} />
+                        </button>
+                        <span className="pos-stepper-qty">{inCartQty}</span>
+                        <button
+                          type="button"
+                          className="pos-stepper-btn"
+                          disabled={isCartFull}
+                          style={isCartFull ? { opacity: 0.35, cursor: 'not-allowed' } : {}}
+                          onClick={() => {
+                            const res = updateQuantity(product.id, inCartQty + 1);
+                            if (res && !res.success && res.reason === 'max_stock_reached') {
+                              toast.error(`Stok "${product.name}" hanya tersedia ${product.stock}!`, { id: `stock-${product.id}` });
+                            }
+                          }}
+                          title={isCartFull ? `Stok maks (${product.stock})` : 'Tambah'}
+                        >
+                          <Plus size={12} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="pos-add-btn"
+                        disabled={isOut}
+                        onClick={handleAdd}
+                        title={isOut ? 'Stok habis' : `Tambah ${product.name}`}
+                      >
+                        <Plus size={14} />
+                      </button>
                     )}
                   </div>
                 </div>
               );
             })}
           </div>
+
         )}
       </div>
 

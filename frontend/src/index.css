@@ -1253,6 +1253,207 @@ body {
 .product-stock-badge.out       { background: var(--danger-bg);   color: var(--danger); }
 
 /* ===========================
+   POS PRODUCT LIST (new list layout)
+=========================== */
+.pos-product-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+
+.pos-list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.14s ease;
+  min-height: 60px;
+}
+
+.pos-list-row:first-child {
+  border-top: 1px solid var(--border);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.pos-list-row:last-child {
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.pos-list-row:first-child:last-child {
+  border-radius: var(--radius-md);
+}
+
+.pos-list-row:hover {
+  background: var(--bg-hover);
+}
+
+.pos-list-row.out-of-stock {
+  opacity: 0.45;
+}
+
+.pos-list-row.cart-full {
+  background: rgba(99, 102, 241, 0.04);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+/* Left: identity (clickable area) */
+.pos-list-identity {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+.pos-list-row.out-of-stock .pos-list-identity {
+  cursor: not-allowed;
+}
+
+.pos-list-emoji {
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 30px;
+  text-align: center;
+}
+
+.pos-list-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.pos-list-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pos-list-meta {
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Center: price + stock (clickable) */
+.pos-list-center {
+  flex-shrink: 0;
+  text-align: right;
+  min-width: 100px;
+  cursor: pointer;
+}
+
+.pos-list-row.out-of-stock .pos-list-center {
+  cursor: not-allowed;
+}
+
+.pos-list-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+/* Right: action controls */
+.pos-list-action {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 80px;
+}
+
+/* Add button (shows when qty = 0) */
+.pos-add-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.pos-add-btn:hover {
+  background: var(--accent);
+  color: var(--bg-root);
+  border-color: var(--accent);
+  transform: scale(1.06);
+}
+
+.pos-add-btn:active {
+  transform: scale(0.95);
+}
+
+.pos-add-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Stepper (shows when qty > 0) */
+.pos-list-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.pos-stepper-btn {
+  width: 28px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.12s;
+  flex-shrink: 0;
+}
+
+.pos-stepper-btn:hover:not(:disabled) {
+  background: var(--bg-subtle-hover);
+}
+
+.pos-stepper-btn:active:not(:disabled) {
+  background: var(--accent-dim);
+}
+
+.pos-stepper-qty {
+  min-width: 28px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  padding: 0 2px;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  line-height: 32px;
+  height: 32px;
+}
+
+
+/* ===========================
    CART
 =========================== */
 .cart-panel {
@@ -2650,6 +2851,52 @@ tbody tr:hover td {
   .product-card .product-price {
     font-size: 13px;
   }
+
+  /* POS List — mobile tweaks */
+  .pos-list-row {
+    padding: 9px 12px;
+    gap: 9px;
+    min-height: 54px;
+  }
+
+  .pos-list-emoji {
+    font-size: 19px;
+    width: 26px;
+  }
+
+  .pos-list-name {
+    font-size: 13px;
+  }
+
+  .pos-list-price {
+    font-size: 13px;
+  }
+
+  .pos-list-center {
+    min-width: 80px;
+  }
+
+  .pos-list-action {
+    min-width: 70px;
+  }
+
+  .pos-add-btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .pos-stepper-btn {
+    width: 25px;
+    height: 30px;
+  }
+
+  .pos-stepper-qty {
+    min-width: 24px;
+    font-size: 12px;
+    height: 30px;
+    line-height: 30px;
+  }
+
 
   /* Floating Cart Bar - sits above bottom nav */
   .pos-mobile-cart-bar {
