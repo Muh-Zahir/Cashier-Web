@@ -1492,6 +1492,51 @@ body {
   height: 32px;
 }
 
+.pos-stepper-input {
+  width: 42px;
+  height: 32px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-radius: 0;
+  padding: 0 2px;
+  margin: 0;
+  outline: none;
+  cursor: text;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+  transition: background 0.12s, box-shadow 0.12s;
+}
+
+[data-theme="light"] .pos-stepper-input {
+  background: transparent !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: 1px solid var(--border) !important;
+  border-right: 1px solid var(--border) !important;
+}
+
+.pos-stepper-input::-webkit-outer-spin-button,
+.pos-stepper-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.pos-stepper-input:hover {
+  background: var(--bg-subtle-hover);
+}
+
+.pos-stepper-input:focus {
+  background: var(--bg-hover) !important;
+  box-shadow: inset 0 0 0 1.5px var(--accent) !important;
+}
+
 
 /* ===========================
    CART
@@ -1732,6 +1777,47 @@ body {
   min-width: 20px;
   text-align: center;
   font-variant-numeric: tabular-nums;
+}
+
+.qty-input {
+  width: 38px;
+  height: 22px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 0 2px;
+  margin: 0;
+  outline: none;
+  cursor: text;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+[data-theme="light"] .qty-input {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+}
+
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.qty-input:hover {
+  background: var(--bg-subtle-hover) !important;
+}
+
+.qty-input:focus {
+  background: var(--bg-card) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px var(--accent-dim) !important;
 }
 
 .cart-item-subtotal {
@@ -2930,7 +3016,9 @@ tbody tr:hover td {
     height: 30px;
   }
 
-  .pos-stepper-qty {
+  .pos-stepper-qty,
+  .pos-stepper-input {
+    width: 34px;
     min-width: 24px;
     font-size: 12px;
     height: 30px;

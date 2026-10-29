@@ -402,6 +402,109 @@ function ShippingSection() {
   );
 }
 
+// ====== EDITABLE QUANTITY INPUT ======
+function EditableQtyInput({
+  value,
+  maxStock,
+  productName = 'Produk',
+  onChange,
+  className = '',
+  title = 'Klik untuk ubah jumlah manual',
+}) {
+  const [inputValue, setInputValue] = useState(String(value));
+  const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    if (!isEditing) {
+      setInputValue(String(value));
+    }
+  }, [value, isEditing]);
+
+  const commitValue = (valStr) => {
+    setIsEditing(false);
+    const trimmed = (valStr || '').trim();
+    if (trimmed === '') {
+      setInputValue(String(value));
+      return;
+    }
+
+    const parsed = parseInt(trimmed, 10);
+    if (isNaN(parsed)) {
+      setInputValue(String(value));
+      return;
+    }
+
+    if (parsed <= 0) {
+      onChange(0);
+      return;
+    }
+
+    const max = typeof maxStock === 'number' ? maxStock : Infinity;
+    if (parsed > max) {
+      toast.error(`Stok "${productName}" hanya tersedia ${max}!`, { id: `stock-limit-${productName}` });
+      onChange(max);
+      setInputValue(String(max));
+      return;
+    }
+
+    onChange(parsed);
+    setInputValue(String(parsed));
+  };
+
+  const handleChange = (e) => {
+    const raw = e.target.value.replace(/[^0-9]/g, '');
+    setInputValue(raw);
+
+    if (raw !== '') {
+      const parsed = parseInt(raw, 10);
+      if (parsed > 0) {
+        const max = typeof maxStock === 'number' ? maxStock : Infinity;
+        if (parsed > max) {
+          toast.error(`Stok "${productName}" hanya tersedia ${max}!`, { id: `stock-limit-${productName}` });
+          onChange(max);
+          setInputValue(String(max));
+        } else {
+          onChange(parsed);
+        }
+      }
+    }
+  };
+
+  const handleBlur = (e) => {
+    commitValue(e.target.value);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur();
+    } else if (e.key === 'Escape') {
+      setIsEditing(false);
+      setInputValue(String(value));
+      e.currentTarget.blur();
+    }
+  };
+
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      className={className}
+      value={inputValue}
+      title={title}
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+      onFocus={(e) => {
+        setIsEditing(true);
+        e.target.select();
+      }}
+      onChange={handleChange}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+    />
+  );
+}
+
 // ====== CART PANEL ======
 function CartPanel({ onCheckout, mobileOpen = false, onCloseMobile }) {
   const {
@@ -548,7 +651,19 @@ function CartPanel({ onCheckout, mobileOpen = false, onCloseMobile }) {
                       >
                         <Minus size={11} />
                       </button>
-                      <span className="qty-display">{item.quantity}</span>
+                      <EditableQtyInput
+                        value={item.quantity}
+                        maxStock={item.stock}
+                        productName={item.name}
+                        onChange={(newQty) => {
+                          const res = updateQuantity(item.id, newQty);
+                          if (res && !res.success && res.reason === 'max_stock_reached') {
+                            toast.error(`Stok "${item.name}" hanya tersedia ${item.stock}!`, { id: `stock-${item.id}` });
+                          }
+                        }}
+                        className="qty-input"
+                        title="Klik untuk ubah jumlah manual"
+                      />
                       <button
                         type="button"
                         className="qty-btn"
@@ -933,9 +1048,9 @@ export default function POSPage() {
                   </div>
 
                   {/* Right: add button or qty stepper */}
-                  <div className="pos-list-action">
+                  <div className="pos-list-action" onClick={(e) => e.stopPropagation()}>
                     {inCartQty > 0 ? (
-                      <div className="pos-list-stepper">
+                      <div className="pos-list-stepper" onClick={(e) => e.stopPropagation()}>
                         <button
                           type="button"
                           className="pos-stepper-btn"
@@ -944,7 +1059,19 @@ export default function POSPage() {
                         >
                           <Minus size={12} />
                         </button>
-                        <span className="pos-stepper-qty">{inCartQty}</span>
+                        <EditableQtyInput
+                          value={inCartQty}
+                          maxStock={product.stock}
+                          productName={product.name}
+                          onChange={(newQty) => {
+                            const res = updateQuantity(product.id, newQty);
+                            if (res && !res.success && res.reason === 'max_stock_reached') {
+                              toast.error(`Stok "${product.name}" hanya tersedia ${product.stock}!`, { id: `stock-${product.id}` });
+                            }
+                          }}
+                          className="pos-stepper-input"
+                          title="Klik untuk ubah jumlah manual"
+                        />
                         <button
                           type="button"
                           className="pos-stepper-btn"
