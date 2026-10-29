@@ -6,31 +6,24 @@ const db = require('../database/db');
 router.get('/summary', (req, res) => {
   try {
     const today = new Date().toISOString().slice(0, 10);
-
-    // Today's stats (revenue + profit)
-    const todayStats = db.prepare(`
-      SELECT
-        COUNT(*) as transaction_count,
-        COALESCE(SUM(grand_total), 0) as total_revenue,
-        COALESCE(AVG(grand_total), 0) as avg_transaction,
-        COALESCE(SUM(profit), 0) as total_profit,
-        COALESCE(SUM(total_cost), 0) as total_cost,
-        COALESCE(SUM(shipping_cost), 0) as total_shipping
-      FROM transactions
-      WHERE DATE(created_at) = ?
-    `).get(today);
-
-    // This month's stats
     const monthStart = today.slice(0, 7) + '-01';
-    const monthStats = db.prepare(`
-      SELECT
-        COUNT(*) as transaction_count,
-        COALESCE(SUM(grand_total), 0) as total_revenue,
-        COALESCE(SUM(profit), 0) as total_profit,
-        COALESCE(SUM(total_cost), 0) as total_cost
-      FROM transactions
-      WHERE DATE(created_at) >= ?
-    `).get(monthStart);
+
+    const BREAKDOWN_SQL = `
+      COUNT(*) as transaction_count,
+      COALESCE(SUM(grand_total), 0) as total_revenue,
+      COALESCE(SUM(profit), 0) as total_profit,
+      COALESCE(SUM(total_cost), 0) as total_cost,
+      COALESCE(SUM(shipping_cost), 0) as total_shipping,
+      COUNT(CASE WHEN customer_type = 'regular' OR customer_type IS NULL THEN 1 END) as toko_count,
+      COALESCE(SUM(CASE WHEN customer_type = 'regular' OR customer_type IS NULL THEN grand_total ELSE 0 END), 0) as toko_revenue,
+      COALESCE(SUM(CASE WHEN customer_type = 'regular' OR customer_type IS NULL THEN profit ELSE 0 END), 0) as toko_profit,
+      COUNT(CASE WHEN customer_type = 'reseller' THEN 1 END) as supplier_count,
+      COALESCE(SUM(CASE WHEN customer_type = 'reseller' THEN grand_total ELSE 0 END), 0) as supplier_revenue,
+      COALESCE(SUM(CASE WHEN customer_type = 'reseller' THEN profit ELSE 0 END), 0) as supplier_profit
+    `;
+
+    const todayStats = db.prepare(`SELECT ${BREAKDOWN_SQL} FROM transactions WHERE DATE(created_at) = ?`).get(today);
+    const monthStats = db.prepare(`SELECT ${BREAKDOWN_SQL} FROM transactions WHERE DATE(created_at) >= ?`).get(monthStart);
 
     // Total products & low stock
     const productStats = db.prepare(`
@@ -114,3 +107,4 @@ router.get('/chart', (req, res) => {
 });
 
 module.exports = router;
+

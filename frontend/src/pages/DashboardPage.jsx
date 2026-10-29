@@ -2,40 +2,118 @@ import React, { useEffect, useState } from 'react';
 import { dashboardApi } from '../api';
 import { useAuthStore } from '../store/useAuthStore';
 import { formatRupiah, formatDateShort, formatDate } from '../utils/format';
+import { PRICE_LABELS } from '../config/clientConfig';
 import {
   TrendingUp, ShoppingCart, Package, AlertTriangle,
   BarChart2, Clock, ArrowUpRight, DollarSign, Truck, Wallet,
+  Store, Users,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+// ── Profit Breakdown Card (Toko + Supplier) ──────────────────────────────────
+function ProfitBreakdownCard({ period, todayData, monthData }) {
+  const d = period === 'today' ? todayData : monthData;
+  const periodLabel = period === 'today' ? 'Hari Ini' : 'Bulan Ini';
 
-function SimpleBarChart({ data }) {
-  if (!data || !Array.isArray(data) || data.length === 0) return (
-    <div className="empty-state">
-      <span className="empty-icon">📊</span>
-      <p className="empty-title">Belum ada data</p>
-    </div>
-  );
+  const tokoProfit     = d?.toko_profit     ?? 0;
+  const supplierProfit = d?.supplier_profit ?? 0;
+  const totalProfit    = d?.total_profit    ?? 0;
+  const tokoRevenue    = d?.toko_revenue    ?? 0;
+  const supplierRevenue= d?.supplier_revenue?? 0;
+  const totalRevenue   = d?.total_revenue   ?? 0;
 
-  const maxRevenue = Math.max(...data.map((d) => Number(d.revenue) || 0), 1);
+  const tokoMargin     = tokoRevenue     > 0 ? ((tokoProfit / tokoRevenue) * 100).toFixed(1)     : '0.0';
+  const supplierMargin = supplierRevenue > 0 ? ((supplierProfit / supplierRevenue) * 100).toFixed(1) : '0.0';
+  const totalMargin    = totalRevenue    > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1)    : '0.0';
+
+  // bar widths for visual breakdown
+  const tokoBarPct     = totalProfit > 0 ? Math.round((tokoProfit / totalProfit) * 100)     : 0;
+  const supplierBarPct = totalProfit > 0 ? Math.round((supplierProfit / totalProfit) * 100) : 0;
 
   return (
-    <div style={{ padding: '16px 0' }}>
-      <div className="simple-bar-chart">
-        {data.map((item, idx) => {
-          const rev = Number(item.revenue) || 0;
-          const heightPct = (rev / maxRevenue) * 100;
-          return (
-            <div key={idx} className="bar-item" title={`${formatDateShort(item.date)}: Omset ${formatRupiah(rev)} | Laba ${formatRupiah(item.profit || 0)}`}>
-              <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                <div
-                  className="bar-fill"
-                  style={{ height: `${Math.max(heightPct, 4)}%`, width: '100%' }}
-                />
-              </div>
-              <span className="bar-label">{formatDateShort(item.date)}</span>
+    <div className="card" style={{ padding: '20px 22px' }}>
+      {/* Header + Period Pills */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <TrendingUp size={17} style={{ color: 'var(--accent)' }} />
+          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
+            Breakdown Laba Bersih
+          </span>
+        </div>
+        <div style={{ display: 'flex', gap: 5 }}>
+          {['today', 'month'].map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => period !== p && undefined}
+              className={`btn btn-sm ${period === p ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ fontSize: 11, padding: '4px 10px', cursor: 'default', pointerEvents: 'none' }}
+            >
+              {p === 'today' ? 'Hari Ini' : 'Bulan Ini'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Total */}
+      <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 10, background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+          Total Laba {periodLabel}
+        </div>
+        <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>
+          {formatRupiah(totalProfit)}
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+          Margin {totalMargin}% dari omset {formatRupiah(totalRevenue)}
+        </div>
+      </div>
+
+      {/* Stacked visual bar */}
+      {totalProfit > 0 && (
+        <div style={{ height: 8, borderRadius: 99, overflow: 'hidden', display: 'flex', marginBottom: 16 }}>
+          <div style={{ width: `${tokoBarPct}%`, background: 'var(--accent)', transition: 'width 0.4s ease' }} />
+          <div style={{ width: `${supplierBarPct}%`, background: 'var(--success)', transition: 'width 0.4s ease' }} />
+        </div>
+      )}
+
+      {/* Row breakdown */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {/* Toko */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.15)' }}>
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(99,102,241,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Store size={15} style={{ color: 'var(--accent)' }} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>
+              {PRICE_LABELS.regularName}
             </div>
-          );
-        })}
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+              {d?.toko_count ?? 0} transaksi · Omset {formatRupiah(tokoRevenue)}
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--accent)' }}>{formatRupiah(tokoProfit)}</div>
+            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Margin {tokoMargin}%</div>
+          </div>
+        </div>
+
+        {/* Supplier */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, background: 'rgba(163,230,199,0.07)', border: '1px solid rgba(163,230,199,0.15)' }}>
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(163,230,199,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Users size={15} style={{ color: 'var(--success)' }} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>
+              {PRICE_LABELS.specialName}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+              {d?.supplier_count ?? 0} transaksi · Omset {formatRupiah(supplierRevenue)}
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--success)' }}>{formatRupiah(supplierProfit)}</div>
+            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Margin {supplierMargin}%</div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -44,6 +122,7 @@ function SimpleBarChart({ data }) {
 export default function DashboardPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profitPeriod, setProfitPeriod] = useState('today'); // 'today' | 'month'
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'admin';
 
@@ -111,24 +190,24 @@ export default function DashboardPage() {
   const recentTransactions = Array.isArray(rawRecent) ? rawRecent : [];
 
   const todayRevenue = today?.total_revenue ?? today?.revenue ?? 0;
-  const todayProfit = today?.total_profit ?? today?.profit ?? 0;
-  const todayCount = today?.transaction_count ?? today?.count ?? 0;
-  const todayMargin = todayRevenue > 0 ? Math.round((todayProfit / todayRevenue) * 100) : 0;
+  const todayProfit  = today?.total_profit  ?? today?.profit  ?? 0;
+  const todayCount   = today?.transaction_count ?? today?.count ?? 0;
+  const todayMargin  = todayRevenue > 0 ? Math.round((todayProfit / todayRevenue) * 100) : 0;
 
   const monthRevenue = month?.total_revenue ?? month?.revenue ?? 0;
-  const monthProfit = month?.total_profit ?? month?.profit ?? 0;
-  const monthCount = month?.transaction_count ?? month?.count ?? 0;
-  const monthMargin = monthRevenue > 0 ? Math.round((monthProfit / monthRevenue) * 100) : 0;
+  const monthProfit  = month?.total_profit  ?? month?.profit  ?? 0;
+  const monthCount   = month?.transaction_count ?? month?.count ?? 0;
+  const monthMargin  = monthRevenue > 0 ? Math.round((monthProfit / monthRevenue) * 100) : 0;
 
-  const totalProducts = products?.total_products ?? products?.total ?? 0;
-  const lowStockCount = products?.low_stock_count ?? products?.low_stock ?? 0;
+  const totalProducts  = products?.total_products ?? products?.total ?? 0;
+  const lowStockCount  = products?.low_stock_count ?? products?.low_stock ?? 0;
 
   return (
     <div className="page-wrapper">
       <div className="page-header">
         <div>
           <h1 className="page-title">Dashboard Kasir</h1>
-          <p className="page-subtitle">Ringkasan penjualan, estimasi laba & performa toko</p>
+          <p className="page-subtitle">Ringkasan penjualan, estimasi laba &amp; performa toko</p>
         </div>
         <button className="btn btn-secondary btn-sm" onClick={loadData}>
           <ArrowUpRight size={14} /> Refresh
@@ -210,6 +289,36 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Profit Breakdown (admin only) ─────────────────────────────────────── */}
+      {isAdmin && (
+        <div style={{ marginBottom: 24 }}>
+          {/* Period filter pills */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 12, alignItems: 'center' }}>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600, marginRight: 4 }}>Filter Laba:</span>
+            {[
+              { key: 'today', label: '📅 Hari Ini' },
+              { key: 'month', label: '📆 Bulan Ini' },
+            ].map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                className={`btn btn-sm ${profitPeriod === key ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ fontSize: 12, padding: '5px 14px' }}
+                onClick={() => setProfitPeriod(key)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <ProfitBreakdownCard
+            period={profitPeriod}
+            todayData={today}
+            monthData={month}
+          />
+        </div>
+      )}
 
       {/* Charts & Top Products */}
       <div className="grid-2" style={{ marginBottom: 24 }}>
@@ -340,3 +449,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+
