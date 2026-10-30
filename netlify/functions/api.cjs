@@ -462,44 +462,75 @@ exports.handler = async function(event, context) {
 
     // ========== DASHBOARD ROUTES ==========
     if (path === '/dashboard/summary' && method === 'GET') {
-      const today = await query(`
-        SELECT COUNT(*) as count, COALESCE(SUM(grand_total), 0) as revenue, COALESCE(SUM(profit), 0) as profit
-        FROM transactions WHERE date(created_at) = date('now')
-      `);
-      const month = await query(`
-        SELECT COUNT(*) as count, COALESCE(SUM(grand_total), 0) as revenue, COALESCE(SUM(profit), 0) as profit
-        FROM transactions WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
-      `);
-      const prodStats = await query(`
-        SELECT COUNT(*) as total,
-          SUM(CASE WHEN stock <= 5 AND stock > 0 THEN 1 ELSE 0 END) as low_stock,
-          SUM(CASE WHEN stock = 0 THEN 1 ELSE 0 END) as out_of_stock
-        FROM products WHERE is_active = 1
-      `);
-      const topProducts = await query(`
-        SELECT product_name as name, SUM(quantity) as total_sold, SUM(subtotal) as total_revenue
-        FROM transaction_items
-        GROUP BY product_id, product_name
-        ORDER BY total_sold DESC LIMIT 5
-      `);
-      const last7Days = await query(`
-        SELECT date(created_at) as date, COALESCE(SUM(grand_total), 0) as revenue, COUNT(*) as count
-        FROM transactions
-        WHERE date(created_at) >= date('now', '-6 days')
-        GROUP BY date(created_at)
-        ORDER BY date ASC
-      `);
-      const recentTrx = await query('SELECT * FROM transactions ORDER BY created_at DESC LIMIT 5');
+      const BREAKDOWN_SELECT = `
+        COUNT(*) as count,
+        COALESCE(SUM(grand_total), 0) as revenue,
+        COALESCE(SUM(profit), 0) as profit,
+        COALESCE(SUM(total_cost), 0) as total_cost,
+        COALESCE(SUM(shipping_cost), 0) as total_shipping,
+        COUNT(CASE WHEN customer_type = 'regular' OR customer_type IS NULL THEN 1 END) as toko_count,
+        COALESCE(SUM(CASE WHEN customer_type = 'regular' OR customer_type IS NULL THEN grand_total ELSE 0 END), 0) as toko_revenue,
+        COALESCE(SUM(CASE WHEN customer_type = 'regular' OR customer_type IS NULL THEN profit ELSE 0 END), 0) as toko_profit,
+        COUNT(CASE WHEN customer_type = 'reseller' THEN 1 END) as supplier_count,
+        COALESCE(SUM(CASE WHEN customer_type = 'reseller' THEN grand_total ELSE 0 END), 0) as supplier_revenue,
+        COALESCE(SUM(CASE WHEN customer_type = 'reseller' THEN profit ELSE 0 END), 0) as supplier_profit
+      `;
 
-      const todayRow = today.rows[0] || { count: 0, revenue: 0, profit: 0 };
-      const monthRow = month.rows[0] || { count: 0, revenue: 0, profit: 0 };
-      const prodRow = prodStats.rows[0] || { total: 0, low_stock: 0, out_of_stock: 0 };
-      const topProdRows = (topProducts.rows || []).map(p => ({
-        ...p,
-        product_name: p.name || p.product_name,
-      }));
-      const last7Rows = last7Days.rows || [];
-      const recentRows = recentTrx.rows || [];
+      const [todayRes, monthRes, prodStatsRes, topProductsRes, last7DaysRes, recentTrxRes] = await Promise.all([
+        query(`SELECT ${BREAKDOWN_SELECT} FROM transactions WHERE date(created_at, '+7 hours') = date('now', '+7 hours')`),
+        query(`SELECT ${BREAKDOWN_SELECT} FROM transactions WHERE strftime('%Y-%m', created_at, '+7 hours') = strftime('%Y-%m', 'now', '+7 hours')`),
+        query(`
+          SELECT COUNT(*) as total,
+            SUM(CASE WHEN stock <= 5 AND stock > 0 THEN 1 ELSE 0 END) as low_stock,
+            SUM(CASE WHEN stock = 0 THEN 1 ELSE 0 END) as out_of_stock
+          FROM products WHERE is_active = 1
+        `),
+        query(`
+          SELECT product_name as name, SUM(quantity) as total_sold, SUM(subtotal) as total_revenue,
+            COALESCE(SUM(profit), 0) as total_profit
+          FROM transaction_items ti
+          JOIN transactions t ON ti.transaction_id = t.id
+          WHERE strftime('%Y-%m', t.created_at, '+7 hours') = strftime('%Y-%m', 'now', '+7 hours')
+          GROUP BY product_id, product_name
+          ORDER BY total_sold DESC LIMIT 5
+        `),
+        query(`
+          SELECT date(created_at, '+7 hours') as date, COALESCE(SUM(grand_total), 0) as revenue,
+            COALESCE(SUM(profit), 0) as profit, COUNT(*) as count
+          FROM transactions
+          WHERE date(created_at, '+7 hours') >= date('now', '+7 hours', '-6 days')
+          GROUP BY date(created_at, '+7 hours')
+          ORDER BY date ASC
+        `),
+        query('SELECT * FROM transactions ORDER BY created_at DESC LIMIT 5'),
+      ]);
+
+      const todayRow   = todayRes.rows[0]   || {};
+      const monthRow   = monthRes.rows[0]   || {};
+      const prodRow    = prodStatsRes.rows[0] || { total: 0, low_stock: 0, out_of_stock: 0 };
+      const topProdRows = (topProductsRes.rows || []).map(p => ({ ...p, product_name: p.name || p.product_name }));
+      const last7Rows  = last7DaysRes.rows  || [];
+      const recentRows = recentTrxRes.rows  || [];
+
+      function buildPeriodData(row) {
+        return {
+          count:             Number(row.count || 0),
+          revenue:           Number(row.revenue || 0),
+          profit:            Number(row.profit || 0),
+          transaction_count: Number(row.count || 0),
+          total_revenue:     Number(row.revenue || 0),
+          total_profit:      Number(row.profit || 0),
+          total_cost:        Number(row.total_cost || 0),
+          total_shipping:    Number(row.total_shipping || 0),
+          // breakdown by customer type
+          toko_count:        Number(row.toko_count || 0),
+          toko_revenue:      Number(row.toko_revenue || 0),
+          toko_profit:       Number(row.toko_profit || 0),
+          supplier_count:    Number(row.supplier_count || 0),
+          supplier_revenue:  Number(row.supplier_revenue || 0),
+          supplier_profit:   Number(row.supplier_profit || 0),
+        };
+      }
 
       return {
         statusCode: 200,
@@ -507,35 +538,20 @@ exports.handler = async function(event, context) {
         body: JSON.stringify({
           success: true,
           data: {
-            today: {
-              ...todayRow,
-              transaction_count: todayRow.count,
-              total_revenue: todayRow.revenue,
-              total_profit: todayRow.profit,
-            },
-            month: {
-              ...monthRow,
-              transaction_count: monthRow.count,
-              total_revenue: monthRow.revenue,
-              total_profit: monthRow.profit,
-            },
-            this_month: {
-              ...monthRow,
-              transaction_count: monthRow.count,
-              total_revenue: monthRow.revenue,
-              total_profit: monthRow.profit,
-            },
+            today:               buildPeriodData(todayRow),
+            month:               buildPeriodData(monthRow),
+            this_month:          buildPeriodData(monthRow),
             products: {
               ...prodRow,
-              total_products: prodRow.total,
-              low_stock_count: prodRow.low_stock,
+              total_products:    prodRow.total,
+              low_stock_count:   prodRow.low_stock,
             },
-            topProducts: topProdRows,
-            top_products: topProdRows,
-            last7Days: last7Rows,
-            last_7_days: last7Rows,
-            recentTransactions: recentRows,
-            recent_transactions: recentRows
+            topProducts:         topProdRows,
+            top_products:        topProdRows,
+            last7Days:           last7Rows,
+            last_7_days:         last7Rows,
+            recentTransactions:  recentRows,
+            recent_transactions: recentRows,
           }
         })
       };

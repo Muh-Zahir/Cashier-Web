@@ -272,7 +272,13 @@ export default function DashboardPage() {
             <div className="stat-icon purple"><Wallet size={22} /></div>
             <div className="stat-label">Laba Bersih Hari Ini</div>
             <div className="stat-value">{formatRupiah(todayProfit)}</div>
-            <div className="stat-sub">Margin: {todayMargin}% dari omset</div>
+            <div className="stat-sub" title={`Toko: ${formatRupiah(today?.toko_profit || 0)} | Supplier: ${formatRupiah(today?.supplier_profit || 0)}`}>
+              {today?.toko_profit > 0 || today?.supplier_profit > 0 ? (
+                <span>{PRICE_LABELS?.regularShort || 'Toko'}: {formatRupiah(today?.toko_profit || 0)} · {PRICE_LABELS?.specialShort || 'Supplier'}: {formatRupiah(today?.supplier_profit || 0)}</span>
+              ) : (
+                `Margin: ${todayMargin}% dari omset`
+              )}
+            </div>
           </div>
         )}
 
@@ -288,7 +294,13 @@ export default function DashboardPage() {
             <div className="stat-icon purple"><DollarSign size={22} /></div>
             <div className="stat-label">Laba Bersih Bulan Ini</div>
             <div className="stat-value">{formatRupiah(monthProfit)}</div>
-            <div className="stat-sub">Margin: {monthMargin}% bulan ini</div>
+            <div className="stat-sub" title={`Toko: ${formatRupiah(month?.toko_profit || 0)} | Supplier: ${formatRupiah(month?.supplier_profit || 0)}`}>
+              {month?.toko_profit > 0 || month?.supplier_profit > 0 ? (
+                <span>{PRICE_LABELS?.regularShort || 'Toko'}: {formatRupiah(month?.toko_profit || 0)} · {PRICE_LABELS?.specialShort || 'Supplier'}: {formatRupiah(month?.supplier_profit || 0)}</span>
+              ) : (
+                `Margin: ${monthMargin}% bulan ini`
+              )}
+            </div>
           </div>
         )}
       </div>
