@@ -724,15 +724,15 @@ function CartPanel({ onCheckout, mobileOpen = false, onCloseMobile }) {
             {isAdmin && profit > 0 && (
               <div style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '7px 10px', background: 'rgba(163,230,199,0.08)',
-                border: '1px solid rgba(163,230,199,0.15)', borderRadius: 8, marginTop: 2,
+                padding: '7px 10px', background: 'var(--success-bg)',
+                border: '1px solid var(--success-border)', borderRadius: 8, marginTop: 2,
               }}>
-                <span style={{ fontSize: 11.5, color: 'var(--success)', display: 'flex', alignItems: 'center', gap: 5, fontWeight: 600 }}>
+                <span style={{ fontSize: 11.5, color: 'var(--success)', display: 'flex', alignItems: 'center', gap: 5, fontWeight: 700 }}>
                   <TrendingUp size={12} /> Est. Laba
                 </span>
                 <div style={{ textAlign: 'right' }}>
                   <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--success)' }}>{formatRupiah(profit)}</span>
-                  <span style={{ fontSize: 10, color: 'var(--text-muted)', marginLeft: 4 }}>({profitMargin}%)</span>
+                  <span style={{ fontSize: 10.5, color: 'var(--text-secondary)', marginLeft: 4, fontWeight: 600 }}>({profitMargin}%)</span>
                 </div>
               </div>
             )}
@@ -1036,7 +1036,7 @@ export default function POSPage() {
                       {formatRupiah(activePrice)}
                     </div>
                     {hasResellerPrice && (
-                      <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>
+                      <div style={{ fontSize: 10.5, color: 'var(--text-secondary)', fontWeight: 600, marginTop: 1 }}>
                         {isResellerMode
                           ? PRICE_LABELS.priceCatalogRegular(formatRupiah(product.price))
                           : PRICE_LABELS.priceCatalogSpecial(formatRupiah(product.reseller_price))}

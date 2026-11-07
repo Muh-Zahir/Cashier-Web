@@ -69,12 +69,12 @@ function ProfitBreakdownCard({ period, onPeriodChange, todayData, monthData }) {
       {/* Header + Period Pills */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <TrendingUp size={18} style={{ color: 'var(--accent)' }} />
+          <TrendingUp size={18} style={{ color: '#6366f1' }} />
           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
             Rincian Laba ({PRICE_LABELS?.regularName || 'Toko'} vs {PRICE_LABELS?.specialName || 'Supplier'})
           </span>
         </div>
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div style={{ display: 'flex', gap: 6, background: 'var(--bg-secondary)', padding: 3, borderRadius: 8, border: '1px solid var(--border)' }}>
           {[
             { key: 'today', label: '📅 Hari Ini' },
             { key: 'month', label: '📆 Bulan Ini' },
@@ -84,7 +84,7 @@ function ProfitBreakdownCard({ period, onPeriodChange, todayData, monthData }) {
               type="button"
               onClick={() => onPeriodChange?.(key)}
               className={`btn btn-sm ${period === key ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ fontSize: 12, padding: '5px 12px', fontWeight: 600 }}
+              style={{ fontSize: 12, padding: '5px 12px', fontWeight: 600, borderRadius: 6 }}
             >
               {label}
             </button>
@@ -94,27 +94,33 @@ function ProfitBreakdownCard({ period, onPeriodChange, todayData, monthData }) {
 
       {/* Total */}
       <div style={{ marginBottom: 16, padding: '14px 16px', borderRadius: 10, background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.6px', fontWeight: 700 }}>
           Total Laba Bersih ({periodLabel})
         </div>
         <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>
           {formatRupiah(totalProfit)}
         </div>
-        <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>
-          Margin {totalMargin}% dari total omset {formatRupiah(totalRevenue)} ({d?.transaction_count ?? 0} transaksi)
+        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 3 }}>
+          Margin <strong style={{ color: 'var(--text-primary)' }}>{totalMargin}%</strong> dari total omset {formatRupiah(totalRevenue)} ({d?.transaction_count ?? 0} transaksi)
         </div>
       </div>
 
       {/* Stacked visual bar */}
       {totalProfit > 0 && (
         <div style={{ marginBottom: 16 }}>
-          <div style={{ height: 8, borderRadius: 99, overflow: 'hidden', display: 'flex', background: 'var(--bg-secondary)' }}>
-            <div style={{ width: `${tokoBarPct}%`, background: 'var(--accent)', transition: 'width 0.4s ease' }} title={`Toko: ${tokoBarPct}%`} />
-            <div style={{ width: `${supplierBarPct}%`, background: 'var(--success)', transition: 'width 0.4s ease' }} title={`Supplier: ${supplierBarPct}%`} />
+          <div style={{ height: 10, borderRadius: 99, overflow: 'hidden', display: 'flex', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+            <div style={{ width: `${tokoBarPct}%`, background: '#6366f1', transition: 'width 0.4s ease' }} title={`Toko: ${tokoBarPct}%`} />
+            <div style={{ width: `${supplierBarPct}%`, background: '#10b981', transition: 'width 0.4s ease' }} title={`Supplier: ${supplierBarPct}%`} />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10.5, color: 'var(--text-muted)', marginTop: 4 }}>
-            <span>{PRICE_LABELS?.regularName || 'Toko'}: {tokoBarPct}%</span>
-            <span>{PRICE_LABELS?.specialName || 'Supplier'}: {supplierBarPct}%</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600, marginTop: 5 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366f1', display: 'inline-block' }} />
+              {PRICE_LABELS?.regularName || 'Toko'}: <strong style={{ color: 'var(--text-primary)' }}>{tokoBarPct}%</strong>
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
+              {PRICE_LABELS?.specialName || 'Supplier'}: <strong style={{ color: 'var(--text-primary)' }}>{supplierBarPct}%</strong>
+            </span>
           </div>
         </div>
       )}
@@ -122,40 +128,40 @@ function ProfitBreakdownCard({ period, onPeriodChange, todayData, monthData }) {
       {/* Row breakdown */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>
         {/* Toko */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 10, background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.18)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 10, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.24)' }}>
           <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(99,102,241,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Store size={18} style={{ color: 'var(--accent)' }} />
+            <Store size={18} style={{ color: '#6366f1' }} />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
               {PRICE_LABELS?.regularName || 'Harga Toko'}
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>
               {d?.toko_count ?? 0} transaksi · Omset {formatRupiah(tokoRevenue)}
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--accent)' }}>{formatRupiah(tokoProfit)}</div>
-            <div style={{ fontSize: 10.5, color: 'var(--text-muted)', marginTop: 1 }}>Margin {tokoMargin}%</div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: '#6366f1' }}>{formatRupiah(tokoProfit)}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 1, fontWeight: 500 }}>Margin {tokoMargin}%</div>
           </div>
         </div>
 
         {/* Supplier */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 10, background: 'rgba(163,230,199,0.07)', border: '1px solid rgba(163,230,199,0.18)' }}>
-          <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(163,230,199,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Users size={18} style={{ color: 'var(--success)' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 10, background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.24)' }}>
+          <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(16,185,129,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Users size={18} style={{ color: '#10b981' }} />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
               {PRICE_LABELS?.specialName || 'Harga Supplier'}
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>
               {d?.supplier_count ?? 0} transaksi · Omset {formatRupiah(supplierRevenue)}
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--success)' }}>{formatRupiah(supplierProfit)}</div>
-            <div style={{ fontSize: 10.5, color: 'var(--text-muted)', marginTop: 1 }}>Margin {supplierMargin}%</div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: '#10b981' }}>{formatRupiah(supplierProfit)}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 1, fontWeight: 500 }}>Margin {supplierMargin}%</div>
           </div>
         </div>
       </div>
@@ -313,35 +319,35 @@ export default function DashboardPage() {
         marginBottom: 24,
       }}>
         <div className="card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 42, height: 42, borderRadius: 10, background: 'var(--bg-secondary)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Truck size={20} style={{ color: 'var(--text-primary)' }} />
+          <div style={{ width: 42, height: 42, borderRadius: 10, background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Truck size={20} style={{ color: '#3b82f6' }} />
           </div>
           <div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Total Ongkir Ekspedisi</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>{formatRupiah(today?.total_shipping || 0)}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Hari ini</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>Total Ongkir Ekspedisi</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>{formatRupiah(today?.total_shipping || 0)}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 1 }}>Hari ini</div>
           </div>
         </div>
 
         <div className="card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 42, height: 42, borderRadius: 10, background: 'var(--bg-secondary)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Package size={20} style={{ color: 'var(--text-primary)' }} />
+          <div style={{ width: 42, height: 42, borderRadius: 10, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Package size={20} style={{ color: '#f59e0b' }} />
           </div>
           <div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Biaya Modal (HPP) Hari Ini</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>{formatRupiah(today?.total_cost || 0)}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Total modal barang keluar</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>Biaya Modal (HPP) Hari Ini</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>{formatRupiah(today?.total_cost || 0)}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 1 }}>Total modal barang keluar</div>
           </div>
         </div>
 
         <div className="card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 42, height: 42, borderRadius: 10, background: 'var(--bg-secondary)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <AlertTriangle size={20} style={{ color: 'var(--text-primary)' }} />
+          <div style={{ width: 42, height: 42, borderRadius: 10, background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <AlertTriangle size={20} style={{ color: '#ef4444' }} />
           </div>
           <div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Stok Perlu Restock</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>{lowStockCount} Produk</div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Dari {totalProducts} produk aktif</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>Stok Perlu Restock</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>{lowStockCount} Produk</div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 1 }}>Dari {totalProducts} produk aktif</div>
           </div>
         </div>
       </div>
@@ -394,10 +400,10 @@ export default function DashboardPage() {
                   }}>
                     <div style={{
                       width: 28, height: 28, borderRadius: '50%',
-                      background: idx === 0 ? '#fff' : 'var(--bg-secondary)',
-                      border: '1px solid var(--border)',
+                      background: idx === 0 ? 'rgba(245,158,11,0.15)' : 'var(--bg-secondary)',
+                      border: idx === 0 ? '1px solid rgba(245,158,11,0.35)' : '1px solid var(--border)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 12, fontWeight: 800, color: idx === 0 ? '#000' : 'var(--text-muted)',
+                      fontSize: 12, fontWeight: 800, color: idx === 0 ? '#d97706' : 'var(--text-secondary)',
                       flexShrink: 0,
                     }}>
                       {idx + 1}
@@ -406,7 +412,7 @@ export default function DashboardPage() {
                       <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
                         {p.product_name}
                       </span>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                      <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 1 }}>
                         Omset: {formatRupiah(p.total_revenue)}
                       </div>
                     </div>
@@ -415,7 +421,7 @@ export default function DashboardPage() {
                         {p.total_sold} terjual
                       </div>
                       {isAdmin && p.total_profit > 0 && (
-                        <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+                        <div style={{ fontSize: 11, color: 'var(--success)', fontWeight: 600, marginTop: 1 }}>
                           Laba: +{formatRupiah(p.total_profit)}
                         </div>
                       )}
