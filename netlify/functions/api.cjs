@@ -486,12 +486,12 @@ exports.handler = async function(event, context) {
           FROM products WHERE is_active = 1
         `),
         query(`
-          SELECT product_name as name, SUM(quantity) as total_sold, SUM(subtotal) as total_revenue,
-            COALESCE(SUM(profit), 0) as total_profit
+          SELECT ti.product_name as name, SUM(ti.quantity) as total_sold, SUM(ti.subtotal) as total_revenue,
+            COALESCE(SUM(ti.profit), 0) as total_profit
           FROM transaction_items ti
           JOIN transactions t ON ti.transaction_id = t.id
           WHERE strftime('%Y-%m', t.created_at, '+7 hours') = strftime('%Y-%m', 'now', '+7 hours')
-          GROUP BY product_id, product_name
+          GROUP BY ti.product_id, ti.product_name
           ORDER BY total_sold DESC LIMIT 5
         `),
         query(`
